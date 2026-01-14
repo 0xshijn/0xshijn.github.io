@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Terminal | IP Lookup Tool</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <style>
+    :root{
+      --bg: #05070a;
+      --panel: #0d1117;
+      --text: #e6edf3;
+      --muted: #8b949e;
+      --line: #30363d;
+      --brand2: #58a6ff;
+      --accent: #238636;
+      --max: 1000px;
+      --mono: "JetBrains Mono", monospace;
+    }
+    body { margin: 0; font-family: var(--mono); color: var(--text); background: var(--bg); line-height: 1.5; padding: 20px; }
+    .wrap { max-width: var(--max); margin: 0 auto; }
+    
+    .terminal-window {
+      background: #010409;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+    }
+    .terminal-header {
+      padding: 12px 16px;
+      background: #161b22;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .dot { width: 12px; height: 12px; border-radius: 50%; }
+    .dot-red { background: #ff5f56; }
+    .dot-yellow { background: #ffbd2e; }
+    .dot-green { background: #27c93f; }
+    .title { margin-left: auto; font-size: 12px; color: var(--muted); }
+
+    .terminal-body { padding: 20px; min-height: 400px; }
+    .input-line { display: flex; gap: 10px; align-items: center; margin-bottom: 20px; }
+    .prompt { color: var(--brand2); font-weight: bold; }
+    input {
+      background: transparent;
+      border: none;
+      color: #fff;
+      font-family: var(--mono);
+      font-size: 16px;
+      flex: 1;
+      outline: none;
+    }
+    
+    .output-area { margin-top: 20px; }
+    .log-entry { margin-bottom: 8px; }
+    .log-info { color: var(--brand2); }
+    .log-success { color: var(--accent); }
+    .log-error { color: #ff5f56; }
+
+    .json-result {
+      background: rgba(255,255,255,0.02);
+      padding: 15px;
+      border-radius: 8px;
+      border: 1px dashed var(--line);
+      margin-top: 15px;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-bottom: 20px;
+      color: var(--brand2);
+      text-decoration: none;
+      font-size: 14px;
+    }
+    .back-link:hover { text-decoration: underline; }
+
+    .scan-anim {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      background: var(--brand2);
+      border-radius: 50%;
+      animation: pulse 1s infinite;
+    }
+    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <a href="../../api.html" class="back-link">← cd ..</a>
+    
+    <div class="terminal-window">
+      <div class="terminal-header">
+        <div class="dot dot-red"></div>
+        <div class="dot dot-yellow"></div>
+        <div class="dot dot-green"></div>
+        <div class="title">shiinn@pentest:~ /tools/ip-lookup</div>
+      </div>
+      <div class="terminal-body">
+        <div class="input-line">
+          <span class="prompt">$</span>
+          <span>ip-lookup --target</span>
+          <input type="text" id="ip-input" placeholder="Để trống để lấy IP của bạn..." autofocus>
+        </div>
+        
+        <div id="terminal-output" class="output-area">
+          <div class="log-entry">Chào mừng đến với IP Lookup Tool v1.0.</div>
+          <div class="log-entry">Nhập địa chỉ IP và nhấn ENTER để bắt đầu quét...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const input = document.getElementById('ip-input');
+    const output = document.getElementById('terminal-output');
+
+    const addLog = (text, type = '') => {
+      const div = document.createElement('div');
+      div.className = `log-entry ${type}`;
+      div.innerHTML = text;
+      output.appendChild(div);
+      window.scrollTo(0, document.body.scrollHeight);
+    };
+
+    input.addEventListener('keypress', async (e) => {
+      if (e.key === 'Enter') {
+        const ip = input.value.trim();
+        input.value = '';
+        input.disabled = true;
+
+        addLog(`<span class="prompt">$</span> ip-lookup --target ${ip || 'self'}`);
+        addLog(`<span class="scan-anim"></span> Đang kết nối tới server dữ liệu chính...`, 'log-info');
+
+        async function fetchIP(target) {
+          // Thử server 1: ipapi.co
+          try {
+            const res = await fetch(`https://ipapi.co/${target}/json/`);
+            const data = await res.json();
+            if (!data.error) return data;
+          } catch (e) {}
+
+          addLog(`[!] Server chính bận, đang chuyển sang server dự phòng...`, 'log-info');
+          
+          // Thử server 2: ip-api.com (Fallback)
+          try {
+            const res = await fetch(`http://ip-api.com/json/${target}`);
+            const data = await res.json();
+            if (data.status === "success") {
+              return {
+                ip: data.query,
+                city: data.city,
+                region: data.regionName,
+                country_name: data.country,
+                org: data.isp,
+                fallback: true,
+                raw: data
+              };
+            }
+          } catch (e) {}
+          
+          throw new Error("Tất cả các server đều bận hoặc bị chặn (CORS).");
+        }
+
+        try {
+          const data = await fetchIP(ip);
+
+          await new Promise(r => setTimeout(r, 800));
+          addLog(`[+] Đã tìm thấy thông tin cho địa chỉ: ${data.ip}`, 'log-success');
+          addLog(`[+] Vị trí: ${data.city}, ${data.region}, ${data.country_name}`);
+          addLog(`[+] Nhà mạng (ISP): ${data.org}`);
+          
+          const resultDiv = document.createElement('div');
+          resultDiv.className = 'json-result';
+          const code = document.createElement('pre');
+          const displayData = data.fallback ? data.raw : data;
+          code.innerHTML = `<code class="hljs language-json">${JSON.stringify(displayData, null, 2)}</code>`;
+          resultDiv.appendChild(code);
+          output.appendChild(resultDiv);
+          hljs.highlightElement(code.querySelector('code'));
+
+        } catch (err) {
+          addLog(`[-] Lỗi: ${err.message}`, 'log-error');
+          if (err.message.includes("CORS")) {
+            addLog(`[tip] Hãy thử mở trang web này bằng Live Server hoặc Hosting thật để tránh lỗi bảo mật trình duyệt.`, 'log-info');
+          }
+        } finally {
+          input.disabled = false;
+          input.focus();
+          addLog(`<br><span class="log-info">Sẵn sàng cho tác vụ tiếp theo...</span>`);
+        }
+      }
+    });
+  </script>
+</body>
+</html>

