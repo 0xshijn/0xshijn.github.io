@@ -3,166 +3,316 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Shiinn | Writeup Viewer</title>
+  <title>0xSHIINN // WRITEUP VIEWER</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,500;0,600;0,700;1,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
   <style>
-    :root{
-      --bg: #0d1117;
-      --panel: #161b22;
-      --text: #c9d1d9;
-      --muted: #8b949e;
-      --line: #30363d;
-      --brand2: #58a6ff;
-      --max: 850px;
+    :root {
+      --bg: #030609;
+      --nav-bg: rgba(3, 6, 9, 0.88);
+      --panel: rgba(10, 18, 28, 0.65);
+      --panel2: rgba(0, 255, 157, 0.06);
+      --text: #e6f1ff;
+      --muted: #7a8fa6;
+      --line: rgba(0, 255, 157, 0.18);
+      --line-subtle: rgba(255, 255, 255, 0.07);
+      --brand: #00ff9d;
+      --brand2: #00f0ff;
+      --max: 1140px;
+      --display: "Chakra Petch", sans-serif;
       --mono: "JetBrains Mono", monospace;
       --sans: "Inter", -apple-system, sans-serif;
     }
     [data-theme="light"] {
-      --bg: #ffffff;
-      --panel: #f6f8fa;
-      --text: #24292f;
-      --muted: #57606a;
-      --line: #d0d7de;
-      --brand2: #0969da;
+      --bg: #f1f5f9;
+      --nav-bg: rgba(241, 245, 249, 0.92);
+      --panel: #ffffff;
+      --panel2: rgba(5, 150, 105, 0.08);
+      --text: #090d16;
+      --muted: #475569;
+      --line: rgba(5, 150, 105, 0.28);
+      --line-subtle: rgba(15, 23, 42, 0.1);
+      --brand: #059669;
+      --brand2: #0284c7;
     }
-    body { margin: 0; font-family: var(--sans); color: var(--text); background: var(--bg); line-height: 1.6; }
-    .wrap { max-width: var(--max); margin: 0 auto; padding: 40px 20px; }
-    .back { color: var(--brand2); text-decoration: none; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 8px; margin-bottom: 40px; opacity: 0.8; transition: 0.2s; }
-    .back:hover { opacity: 1; transform: translateX(-4px); }
-    
-    h1#title { font-size: 2.2rem; margin: 0 0 30px; letter-spacing: -1px; font-weight: 800; color: var(--text); }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: var(--sans);
+      color: var(--text);
+      background-color: var(--bg);
+      line-height: 1.75;
+    }
+    body::before {
+      content: ""; position: fixed; inset: 0;
+      background-image: linear-gradient(to right, var(--line-subtle) 1px, transparent 1px), linear-gradient(to bottom, var(--line-subtle) 1px, transparent 1px);
+      background-size: 64px 64px; pointer-events: none; z-index: 0;
+    }
 
-    /* Markdown Styling */
-    #content { 
-      font-size: 1.05rem; 
-      word-wrap: break-word;
-      overflow-wrap: break-word;
-      word-break: break-word;
+    .progress-wrap {
+      position: fixed; top: 0; left: 0; width: 100%; height: 3px; z-index: 1000; background: rgba(255,255,255,0.04);
     }
-    #content h1, #content h2 { font-size: 1.5rem; margin: 2em 0 1em; color: var(--brand2); border-bottom: 1px solid var(--line); padding-bottom: 0.3em; }
-    #content h3 { font-size: 1.2rem; margin: 1.5em 0 1em; }
-    #content p { margin-bottom: 1.2em; }
-    
-    /* Lời tự sự / Ghi chú */
-    #content blockquote {
-      margin: 20px 0;
-      padding: 1px 20px;
-      color: var(--muted);
-      border-left: 4px solid var(--brand2);
+    #progress-bar {
+      width: 0%; height: 100%;
+      background: linear-gradient(90deg, var(--brand), var(--brand2));
+      box-shadow: 0 0 12px var(--brand);
+    }
+
+    .nav {
+      position: sticky; top: 0; z-index: 100;
+      backdrop-filter: blur(16px);
+      background: var(--nav-bg);
+      border-bottom: 1px solid var(--line);
+    }
+    .nav-inner {
+      max-width: var(--max); margin: 0 auto; padding: 12px 24px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .brand {
+      display: flex; align-items: center; gap: 12px;
+      font-family: var(--display); font-weight: 700; font-size: 1.2rem; color: var(--text); text-decoration: none;
+    }
+    .brand-mark {
+      width: 26px; height: 26px; background: var(--panel2); border: 1px solid var(--brand);
+      clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px));
+      display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 11px; color: var(--brand);
+    }
+    .theme-btn {
+      background: transparent; border: 1px solid var(--line); color: var(--text);
+      width: 34px; height: 34px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+      clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px));
+    }
+    .theme-btn .sun { display: none; }
+    [data-theme="light"] .theme-btn .sun { display: block; }
+    [data-theme="light"] .theme-btn .moon { display: none; }
+
+    .wrap { position: relative; z-index: 2; max-width: var(--max); margin: 0 auto; padding: 36px 24px 80px; }
+    .back {
+      color: var(--brand); text-decoration: none; font-family: var(--mono); font-size: 12px;
+      display: inline-flex; align-items: center; gap: 8px; margin-bottom: 28px;
+      padding: 7px 14px; background: var(--panel2); border: 1px solid var(--line);
+      clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+    }
+
+    .viewer-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 260px;
+      gap: 32px;
+      align-items: start;
+    }
+    @media (max-width: 920px) {
+      .viewer-grid { grid-template-columns: 1fr; }
+      .toc-sidebar { display: none; }
+    }
+
+    .article-card {
       background: var(--panel);
-      border-radius: 0 8px 8px 0;
+      border: 1px solid var(--line-subtle);
+      border-top: 2px solid var(--brand);
+      padding: 40px;
+    }
+    @media (max-width: 600px) { .article-card { padding: 24px 18px; } }
+
+    .post-meta {
+      display: flex; gap: 14px; flex-wrap: wrap;
+      font-family: var(--mono); font-size: 0.8rem; color: var(--muted);
+      margin-bottom: 14px;
+    }
+    .post-meta .tag-pill {
+      padding: 2px 10px; background: var(--panel2); border: 1px solid var(--line);
+      color: var(--brand); font-weight: 700;
+    }
+
+    h1#title {
+      font-family: var(--display);
+      font-size: clamp(28px, 4vw, 40px);
+      margin: 0 0 28px;
+      font-weight: 700;
+      text-transform: uppercase;
+      line-height: 1.15;
+      color: var(--text);
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .toc-sidebar {
+      position: sticky;
+      top: 84px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      padding: 20px;
+      clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 0 100%);
+    }
+    .toc-title {
+      font-family: var(--mono);
+      font-size: 11.5px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--brand);
+      margin: 0 0 12px;
+      font-weight: 700;
+    }
+    .toc-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+    .toc-list a {
+      color: var(--muted); text-decoration: none; font-family: var(--mono); font-size: 0.82rem;
+      display: block; padding: 4px 8px; border-left: 2px solid transparent; transition: 0.15s;
+    }
+    .toc-list a:hover { color: var(--brand); border-left-color: var(--brand); background: var(--panel2); }
+
+    #content { font-size: 1.05rem; word-wrap: break-word; overflow-wrap: break-word; }
+    #content h1, #content h2 {
+      font-family: var(--display);
+      font-size: 1.55rem;
+      text-transform: uppercase;
+      margin: 1.8em 0 0.8em;
+      color: var(--brand);
+      border-bottom: 1px solid var(--line-subtle);
+      padding-bottom: 0.3em;
+    }
+    #content h3 { font-family: var(--display); font-size: 1.25rem; margin: 1.5em 0 0.8em; color: var(--brand2); }
+    #content p { margin-bottom: 1.2em; }
+
+    #content blockquote {
+      margin: 22px 0;
+      padding: 14px 20px;
+      color: var(--muted);
+      border-left: 3px solid var(--brand);
+      background: var(--panel2);
       font-style: italic;
     }
+    #content blockquote p { margin: 0; }
 
-    /* CodeSnap Style */
     .codesnap-container {
-      margin: 32px 0;
-      padding: 50px;
-      background: linear-gradient(135deg, #6e7681 0%, #3b424e 100%);
-      border-radius: 12px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      box-shadow: 0 30px 60px rgba(0,0,0,0.4);
+      margin: 26px 0;
     }
-    [data-theme="light"] .codesnap-container { background: linear-gradient(135deg, #d1d5db 0%, #9ca3af 100%); }
-
     .codesnap-window {
-      background: #1e1e1e;
-      border-radius: 12px;
-      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+      background: #05090f;
+      border: 1px solid var(--line);
+      clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 0 100%);
       width: 100%;
-      max-width: 100%;
       overflow: hidden;
-      border: 1px solid rgba(255,255,255,0.1);
     }
     .codesnap-header {
-      padding: 16px;
-      background: #1e1e1e;
+      padding: 10px 16px;
+      background: rgba(0, 255, 157, 0.06);
+      border-bottom: 1px solid var(--line);
       display: flex;
+      align-items: center;
+      justify-content: space-between;
       gap: 8px;
     }
-    .dot { width: 12px; height: 12px; border-radius: 50%; }
-    .dot-red { background: #ff5f56; }
-    .dot-yellow { background: #ffbd2e; }
-    .dot-green { background: #27c93f; }
+    .codesnap-dots { display: flex; gap: 6px; align-items: center; }
+    .dot { width: 9px; height: 9px; }
+    .dot-red { background: #ff2a54; }
+    .dot-yellow { background: #ffb800; }
+    .dot-green { background: #00ff9d; }
+    .code-lang { font-family: var(--mono); font-size: 11px; color: var(--brand2); text-transform: uppercase; }
+    .copy-code-btn {
+      background: transparent;
+      border: 1px solid var(--line);
+      color: var(--brand);
+      font-family: var(--mono);
+      font-size: 11px;
+      padding: 3px 10px;
+      cursor: pointer;
+    }
+    .copy-code-btn:hover { background: var(--brand); color: #020508; font-weight: 700; }
 
     .codesnap-content {
       display: flex;
-      padding: 0 0 20px 0;
+      padding: 0 0 14px 0;
       font-family: var(--mono);
-      font-size: 0.95rem;
-      line-height: 1.5;
+      font-size: 0.9rem;
+      line-height: 1.55;
       overflow-x: auto;
     }
     .line-numbers {
-      padding: 20px 16px;
+      padding: 16px 14px;
       text-align: right;
-      color: #858585;
+      color: #52667a;
       user-select: none;
-      border-right: 1px solid #333;
+      border-right: 1px solid rgba(255,255,255,0.07);
       margin-right: 16px;
-      background: rgba(0,0,0,0.2);
+      background: rgba(0,0,0,0.3);
     }
     .line-numbers pre { margin: 0; padding: 0; }
-    .code-area {
-      flex: 1;
-      color: #d4d4d4;
-      padding: 20px 20px 20px 0;
-    }
+    .code-area { flex: 1; color: #e2e8f0; padding: 16px 16px 16px 0; }
     .code-area pre { margin: 0; padding: 0; background: transparent; }
     .code-area code { background: transparent !important; padding: 0 !important; color: inherit !important; }
-    
-    /* Syntax Highlighting Tweaks */
     .hljs { background: transparent !important; }
-    
-    /* Inline Code */
-    #content :not(pre) > code { 
-      font-family: var(--mono); background: var(--panel); 
-      color: var(--brand2); padding: 3px 6px; border-radius: 6px; font-size: 0.9em; 
+
+    #content :not(pre) > code {
+      font-family: var(--mono); background: var(--panel2);
+      border: 1px solid var(--line);
+      color: var(--brand); padding: 2px 7px; font-size: 0.88em;
     }
 
-    #content .img-wrapper {
-      margin: 40px auto;
-      text-align: center;
-      max-width: 70%;
-    }
-    #content img { 
-      width: 100%; 
-      height: auto;
-      border-radius: 12px; 
-      border: 1px solid var(--line); 
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-    }
-    #content .img-caption {
-      display: block;
-      margin-top: 12px;
-      font-size: 0.9rem;
-      color: var(--muted);
-      font-style: italic;
-    }
-    
-    footer { margin-top: 80px; padding: 40px 0; border-top: 1px solid var(--line); color: var(--muted); text-align: center; font-size: 0.9rem; }
+    #content .img-wrapper { margin: 32px auto; text-align: center; max-width: 85%; }
+    #content img { width: 100%; height: auto; border: 1px solid var(--line); }
+    #content .img-caption { display: block; margin-top: 10px; font-family: var(--mono); font-size: 0.82rem; color: var(--muted); }
+
+    footer { margin-top: 60px; padding: 30px 0; border-top: 1px solid var(--line-subtle); color: var(--muted); text-align: center; font-family: var(--mono); font-size: 12px; }
   </style>
 </head>
 <body>
+  <div class="progress-wrap"><div id="progress-bar"></div></div>
+
+  <header class="nav">
+    <div class="nav-inner">
+      <a class="brand" href="../index.html">
+        <span class="brand-mark">0x</span>
+        <span>SHIINN // WRITEUP_VIEWER</span>
+      </a>
+      <button id="theme-toggle" class="theme-btn" aria-label="Toggle theme">
+        <svg class="sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42m12.72-12.72l1.42-1.42"/></svg>
+        <svg class="moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+  </header>
+
   <main class="wrap">
-    <a href="../writeups.html" class="back">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-      Quay lại danh sách
-    </a>
+    <a href="../writeups.html" class="back">← CD .. // WRITEUPS_ARCHIVE</a>
 
-    <h1 id="title">Loading...</h1>
-    <div id="content"></div>
+    <div class="viewer-grid">
+      <article class="article-card">
+        <div class="post-meta">
+          <span class="tag-pill">EXPLOIT_REPORT</span>
+          <span id="read-time">⏱️ CALCULATING...</span>
+        </div>
+        <h1 id="title">Loading...</h1>
+        <div id="content"></div>
+      </article>
 
-    <footer>© Shiinn</footer>
+      <aside class="toc-sidebar">
+        <div class="toc-title">// TABLE_OF_CONTENTS</div>
+        <ul id="toc-list" class="toc-list">
+          <li><a href="#top">TOP_OF_FILE</a></li>
+        </ul>
+      </aside>
+    </div>
+
+    <footer>© 0xSHIINN // PWN &amp; SECURITY RESEARCH</footer>
   </main>
 
   <script>
     const currentTheme = localStorage.getItem("theme");
     if (currentTheme) document.documentElement.setAttribute("data-theme", currentTheme);
+
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+      let theme = document.documentElement.getAttribute("data-theme");
+      if (theme === "light") {
+        document.documentElement.removeAttribute("data-theme");
+        localStorage.setItem("theme", "dark");
+      } else {
+        document.documentElement.setAttribute("data-theme", "light");
+        localStorage.setItem("theme", "light");
+      }
+    });
 
     const urlParams = new URLSearchParams(window.location.search);
     const fileName = urlParams.get('file');
@@ -170,27 +320,22 @@
 
     if (fileName) {
       document.getElementById('title').textContent = displayTitle || fileName;
-      
+
       fetch('data/' + fileName)
         .then(response => {
           if (!response.ok) throw new Error('Không tìm thấy file writeup');
           return response.text();
         })
         .then(text => {
-          const renderer = new marked.Renderer();
-          
-          renderer.code = function(arg1, arg2) {
-            // Xử lý linh hoạt cho các phiên bản marked.js khác nhau
-            let code = "";
-            let lang = "";
+          const words = text.trim().split(/\s+/).length;
+          const mins = Math.max(1, Math.ceil(words / 200));
+          document.getElementById('read-time').textContent = `⏱️ ${mins} MIN READ`;
 
-            if (typeof arg1 === 'string') {
-              code = arg1;
-              lang = arg2 || '';
-            } else if (arg1 && typeof arg1 === 'object') {
-              code = arg1.text || "";
-              lang = arg1.lang || "";
-            }
+          const renderer = new marked.Renderer();
+
+          renderer.code = function(arg1, arg2) {
+            let code = typeof arg1 === 'string' ? arg1 : (arg1.text || "");
+            let lang = typeof arg1 === 'string' ? (arg2 || "") : (arg1.lang || "");
 
             let highlighted = "";
             try {
@@ -200,19 +345,24 @@
                 highlighted = hljs.highlightAuto(code).value;
               }
             } catch (e) {
-              highlighted = code; // Fallback nếu highlight lỗi
+              highlighted = code;
             }
 
             const lines = code.trim().split('\n');
             const lineNumbers = lines.map((_, i) => i + 1).join('\n');
+            const encodedCode = encodeURIComponent(code.trim());
 
             return `
               <div class="codesnap-container">
                 <div class="codesnap-window">
                   <div class="codesnap-header">
-                    <div class="dot dot-red"></div>
-                    <div class="dot dot-yellow"></div>
-                    <div class="dot dot-green"></div>
+                    <div class="codesnap-dots">
+                      <div class="dot dot-red"></div>
+                      <div class="dot dot-yellow"></div>
+                      <div class="dot dot-green"></div>
+                    </div>
+                    <span class="code-lang">LANG // ${lang || 'SHELL'}</span>
+                    <button type="button" class="copy-code-btn" data-code="${encodedCode}">COPY_CODE</button>
                   </div>
                   <div class="codesnap-content">
                     <div class="line-numbers"><pre>${lineNumbers}</pre></div>
@@ -226,31 +376,56 @@
           };
 
           renderer.image = function(arg1, arg2, arg3) {
-            let href = "";
-            let text = "";
-            
-            if (typeof arg1 === 'string') {
-              href = arg1;
-              text = arg3 || "";
-            } else if (arg1 && typeof arg1 === 'object') {
-              href = arg1.href || "";
-              text = arg1.text || "";
-            }
-
+            let href = typeof arg1 === 'string' ? arg1 : (arg1.href || "");
+            let text = typeof arg1 === 'string' ? (arg3 || "") : (arg1.text || "");
             return `
               <div class="img-wrapper">
                 <img src="${href}" alt="${text}">
-                ${text ? `<span class="img-caption">${text}</span>` : ''}
+                ${text ? `<span class="img-caption">// ${text}</span>` : ''}
               </div>
             `;
           };
 
-          document.getElementById('content').innerHTML = marked.parse(text, { renderer: renderer });
+          const contentEl = document.getElementById('content');
+          contentEl.innerHTML = marked.parse(text, { renderer: renderer });
+
+          const headings = contentEl.querySelectorAll('h2, h3');
+          const tocList = document.getElementById('toc-list');
+          if (headings.length > 0) {
+            tocList.innerHTML = '';
+            headings.forEach((h, idx) => {
+              const id = 'sec-' + idx;
+              h.id = id;
+              const li = document.createElement('li');
+              const a = document.createElement('a');
+              a.href = '#' + id;
+              a.textContent = h.textContent;
+              if (h.tagName === 'H3') a.style.paddingLeft = '18px';
+              li.appendChild(a);
+              tocList.appendChild(li);
+            });
+          }
+
+          contentEl.querySelectorAll('.copy-code-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+              const raw = decodeURIComponent(btn.getAttribute('data-code'));
+              navigator.clipboard.writeText(raw);
+              btn.textContent = '[+] COPIED';
+              setTimeout(() => { btn.textContent = 'COPY_CODE'; }, 1600);
+            });
+          });
         })
         .catch(err => {
-          document.getElementById('content').innerHTML = `<div style="color:#ff5f56; padding:20px; background:rgba(255,95,86,0.1); border-radius:12px">Lỗi: ${err.message}</div>`;
+          document.getElementById('content').innerHTML = `<div style="color:#ff2a54; padding:20px; border:1px solid #ff2a54">ERROR: ${err.message}</div>`;
         });
     }
+
+    window.addEventListener("scroll", () => {
+      const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const scrolled = height > 0 ? (winScroll / height) * 100 : 0;
+      document.getElementById("progress-bar").style.width = scrolled + "%";
+    });
   </script>
 </body>
 </html>

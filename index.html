@@ -3,786 +3,2149 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta name="description" content="Portfolio cá nhân" />
-  <title>Shiinn | Portfolio</title>
+  <meta name="description" content="Phước Toàn (0xShiinn) — Pwn & Low-Level Security Researcher" />
+  <title>0xSHIINN // RING-0 EXPLOITATION &amp; SECURITY RESEARCH</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,500;0,600;0,700;1,600;1,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
 
   <style>
-    :root{
-      --bg: #05070a;
-      --nav-bg: rgba(5,7,10,0.8);
-      --panel: rgba(255,255,255,0.03);
-      --panel2: rgba(255,255,255,0.06);
-      --text: #f0f2f5;
-      --muted: #94a3b8;
-      --line: rgba(255,255,255,0.08);
-      --brand: #a855f7;
-      --brand2: #06b6d4;
-      --shadow: 0 10px 40px rgba(0,0,0,0.6);
-      --grad-start: #fff;
-      --grad-end: var(--brand2);
-      --radius: 20px;
-      --max: 1100px;
-      --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      --sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+    :root {
+      --bg: #020306;
+      --bg-card: rgba(9, 13, 22, 0.62);
+      --bg-card-hover: rgba(13, 19, 32, 0.78);
+      --bg-glass: rgba(5, 8, 15, 0.82);
+      --text: #f2f7ff;
+      --muted: #8499b1;
+      --acid: #00ffa3;
+      --acid-glow: rgba(0, 255, 163, 0.45);
+      --acid-dim: rgba(0, 255, 163, 0.09);
+      --cyan: #00e5ff;
+      --cyan-dim: rgba(0, 229, 255, 0.09);
+      --violet: #8b5cf6;
+      --crimson: #ff2a5f;
+      --amber: #ffb800;
+      --border: rgba(255, 255, 255, 0.08);
+      --border-hi: rgba(0, 255, 163, 0.35);
+      --specular: inset 0 1px 0 0 rgba(255, 255, 255, 0.14);
+      --max: 1280px;
+      --display: "Chakra Petch", sans-serif;
+      --mono: "JetBrains Mono", monospace;
+      --sans: "Inter", system-ui, sans-serif;
     }
 
     [data-theme="light"] {
-      --bg: #f8fafc;
-      --nav-bg: rgba(248,250,252,0.9);
-      --panel: #ffffff;
-      --panel2: #f1f5f9;
-      --text: #0f172a;
+      --bg: #f1f5f9;
+      --bg-card: rgba(255, 255, 255, 0.85);
+      --bg-card-hover: rgba(255, 255, 255, 0.98);
+      --bg-glass: rgba(248, 250, 252, 0.9);
+      --text: #090d16;
       --muted: #475569;
-      --line: #e2e8f0;
-      --shadow: 0 10px 40px rgba(0,0,0,0.06);
-      --grad-start: #7c3aed;
-      --grad-end: #0891b2;
+      --acid: #059669;
+      --acid-glow: rgba(5, 150, 105, 0.25);
+      --acid-dim: rgba(5, 150, 105, 0.08);
+      --cyan: #0284c7;
+      --cyan-dim: rgba(2, 132, 199, 0.08);
+      --crimson: #e11d48;
+      --amber: #d97706;
+      --border: rgba(15, 23, 42, 0.1);
+      --border-hi: rgba(5, 150, 105, 0.45);
+      --specular: inset 0 1px 0 0 rgba(255, 255, 255, 0.8);
     }
 
-    *{box-sizing:border-box}
-    html{scroll-behavior:smooth}
-    body{
-      margin:0;
-      font-family:var(--sans);
-      color:var(--text);
-      background: var(--bg);
-      background-image: 
-        radial-gradient(circle at 10% 20%, var(--bg-grad-1, rgba(168,85,247,0.15)), transparent 40%),
-        radial-gradient(circle at 90% 80%, var(--bg-grad-2, rgba(6,182,212,0.1)), transparent 40%);
-      overflow-x:hidden;
-    }
-
-    [data-theme="light"] body {
-      --bg-grad-1: rgba(124,58,237,0.06);
-      --bg-grad-2: rgba(8,145,178,0.06);
-    }
-
-    a{color:inherit;text-decoration:none}
-    .wrap{max-width:var(--max); margin:0 auto; padding:40px 20px 80px}
-
-    /* Top nav */
-    .nav{
-      position:sticky; top:0; z-index:100;
-      backdrop-filter: blur(20px);
-      background: var(--nav-bg, rgba(5,7,10,0.8));
-      border-bottom:1px solid var(--line);
-    }
-    .nav-inner{
-      max-width:var(--max); margin:0 auto; padding:16px 20px;
-      display:flex; align-items:center; justify-content:space-between;
-    }
-    .brand{
-      display:flex; align-items:center; gap:12px;
-      font-weight:800; font-size: 1.1rem; letter-spacing:-0.5px;
-    }
-    .dot{
-      width:12px; height:12px; border-radius:50%;
-      background: linear-gradient(135deg, var(--brand), var(--brand2));
-      box-shadow: 0 0 15px rgba(168,85,247,0.4);
-    }
-    .menu{display:flex; gap:12px; align-items:center}
-    .menu a{
-      padding:8px 16px;
-      border-radius:12px;
-      color:var(--muted);
-      font-weight: 500;
-      transition: all 0.2s ease;
-    }
-    .menu a:hover{
-      color:var(--text);
-      background: var(--panel);
-    }
-    .theme-btn {
-      background: var(--panel);
-      border: 1px solid var(--line);
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: var(--sans);
       color: var(--text);
-      width: 40px;
-      height: 40px;
-      border-radius: 12px;
-      cursor: pointer;
+      background-color: var(--bg);
+      overflow-x: hidden;
+      min-height: 100vh;
+      position: relative;
+    }
+
+    /* Volumetric Aurora + Perspective Cyber Grid + Subtle Noise */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 55% 45% at 72% 22%, rgba(0, 255, 163, 0.11), transparent 70%),
+        radial-gradient(ellipse 50% 40% at 18% 35%, rgba(0, 229, 255, 0.08), transparent 70%),
+        radial-gradient(ellipse 60% 50% at 50% 85%, rgba(139, 92, 246, 0.07), transparent 70%),
+        linear-gradient(to right, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 100% 100%, 48px 48px, 48px 48px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Animated Horizontal Laser Scan Beam */
+    .laser-scan {
+      position: fixed;
+      top: -10%;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent 10%, rgba(0, 255, 163, 0.35) 50%, transparent 90%);
+      box-shadow: 0 0 20px rgba(0, 255, 163, 0.4);
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0.45;
+      animation: scan-vertical 9s linear infinite;
+    }
+    @keyframes scan-vertical {
+      0% { top: -5%; opacity: 0; }
+      10% { opacity: 0.45; }
+      90% { opacity: 0.45; }
+      100% { top: 105%; opacity: 0; }
+    }
+
+    #bg-canvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Custom Tactical Reticle Cursor */
+    .cursor-reticle {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 32px;
+      height: 32px;
+      border: 1px solid rgba(0, 255, 163, 0.5);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      transition: width 0.18s ease, height 0.18s ease, border-color 0.18s ease, border-radius 0.18s ease, background 0.18s ease;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: all 0.2s ease;
-      padding: 0;
     }
-    .theme-btn:hover {
-      background: var(--panel2);
-      transform: translateY(-2px);
+    .cursor-reticle::before {
+      content: "";
+      width: 4px;
+      height: 4px;
+      background: var(--acid);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--acid);
     }
-    .theme-btn .sun { display: none; }
-    [data-theme="light"] .theme-btn .sun { display: block; }
-    [data-theme="light"] .theme-btn .moon { display: none; }
-
-    .cta{
-      background: linear-gradient(135deg, var(--brand), var(--brand2)) !important;
-      color:#fff !important;
-      font-weight:700;
-      box-shadow: 0 8px 20px rgba(168,85,247,0.25);
+    .cursor-reticle.locked {
+      width: 46px;
+      height: 46px;
+      border-radius: 6px;
+      border-color: var(--cyan);
+      background: rgba(0, 229, 255, 0.06);
+      transform: translate(-50%, -50%) rotate(45deg);
     }
-
-    /* Hero */
-    .hero{
-      display:grid;
-      grid-template-columns: 1.1fr 0.9fr;
-      gap:24px;
-      margin-top:20px;
-    }
-    @media (max-width: 900px){ .hero{grid-template-columns:1fr} }
-
-    .card{
-      background: var(--panel);
-      border: 2px solid var(--line);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(10px);
-      transition: all 0.3s ease;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-    }
-    .card:hover{ border-color: var(--brand2); transform: translateY(-5px); }
-
-    /* Music Player Widget */
-    .music-player {
+    .cursor-coords {
       position: fixed;
-      bottom: 24px;
-      left: 24px;
-      z-index: 1000;
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      padding: 12px 16px;
-      backdrop-filter: blur(12px);
-      box-shadow: var(--shadow);
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      width: 280px;
-      transition: all 0.3s ease;
+      top: 0;
+      left: 0;
+      font-family: var(--mono);
+      font-size: 9px;
+      color: var(--acid);
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(22px, 14px);
+      opacity: 0.7;
+      white-space: nowrap;
     }
-    .music-header {
+    @media (max-width: 900px) {
+      .cursor-reticle, .cursor-coords { display: none; }
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    /* ==========================================
+       FLOATING GLASS HUD NAVBAR + TELEMETRY
+       ========================================== */
+    .hud-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--bg-glass);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      border-bottom: 1px solid var(--border);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55);
+    }
+    .telemetry-bar {
+      border-bottom: 1px solid var(--border);
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--muted);
+      padding: 5px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: var(--max);
+      margin: 0 auto;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+    }
+    .telemetry-bar .t-val { color: var(--acid); font-weight: 600; }
+    .telemetry-bar .t-cyan { color: var(--cyan); font-weight: 600; }
+
+    .nav-inner {
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 12px 24px;
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 16px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-family: var(--display);
+      font-weight: 700;
+      font-size: 1.35rem;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+    }
+    .brand-mark {
+      width: 34px;
+      height: 34px;
+      background: linear-gradient(135deg, var(--acid), var(--cyan));
+      color: #020408;
+      clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--mono);
+      font-weight: 800;
+      font-size: 13px;
+      box-shadow: 0 0 22px var(--acid-glow);
+    }
+    .brand span.sub-id {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--cyan);
+      font-weight: 600;
+      padding: 3px 8px;
+      border: 1px solid rgba(0, 229, 255, 0.3);
+      background: var(--cyan-dim);
+      border-radius: 4px;
+    }
+
+    .menu { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+    .menu a {
+      padding: 7px 13px;
+      font-family: var(--mono);
+      font-size: 11.5px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      transition: all 0.2s ease;
+      border-radius: 6px;
+    }
+    .menu a:hover {
+      color: var(--acid);
+      background: var(--acid-dim);
+    }
+    .menu a.cta {
+      background: linear-gradient(135deg, var(--acid), var(--cyan));
+      color: #020408 !important;
+      font-weight: 700;
+      clip-path: polygon(0 0, calc(100% - 7px) 0, 100% 7px, 100% 100%, 7px 100%, 0 calc(100% - 7px));
+      border-radius: 0;
+      box-shadow: 0 0 22px var(--acid-glow);
+    }
+    .menu a.cta:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 0 30px rgba(0, 229, 255, 0.65);
+    }
+
+    .hud-icon-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      box-shadow: var(--specular);
+      color: var(--text);
+      height: 34px;
+      padding: 0 11px;
+      font-family: var(--mono);
+      font-size: 11px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+    .hud-icon-btn:hover {
+      border-color: var(--acid);
+      color: var(--acid);
+      background: var(--acid-dim);
+    }
+    .hud-icon-btn .sun { display: none; }
+    [data-theme="light"] .hud-icon-btn .sun { display: block; }
+    [data-theme="light"] .hud-icon-btn .moon { display: none; }
+
+    @media (max-width: 860px) {
+      .telemetry-bar { display: none; }
+      .brand span.sub-id { display: none; }
+      .menu a { padding: 6px 8px; font-size: 10.5px; }
+    }
+
+    .wrap {
+      position: relative;
+      z-index: 2;
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 36px 24px 120px;
+    }
+
+    /* ==========================================
+       SPECULAR SPOTLIGHT GLASS PANEL MIXIN
+       ========================================== */
+    .cyber-panel {
+      position: relative;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      box-shadow: var(--specular), 0 20px 50px -12px rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      overflow: hidden;
+      transition: border-color 0.28s ease, box-shadow 0.28s ease, transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .cyber-panel::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(
+        550px circle at var(--mx, -500px) var(--my, -500px),
+        rgba(0, 255, 163, 0.085),
+        transparent 40%
+      );
+      pointer-events: none;
+      z-index: 0;
+    }
+    .cyber-panel > * { position: relative; z-index: 1; }
+    .cyber-panel:hover {
+      border-color: var(--border-hi);
+      box-shadow: var(--specular), 0 24px 60px -10px rgba(0, 0, 0, 0.8), 0 0 28px rgba(0, 255, 163, 0.12);
+    }
+
+    /* ==========================================
+       HERO STAGE — HOLOGRAPHIC ID + PWN STUDIO
+       ========================================== */
+    .hero-stage {
+      position: relative;
+      padding: 18px 0 64px;
+      border-bottom: 1px solid var(--border);
+    }
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.06fr 0.94fr;
+      gap: 44px;
+      align-items: center;
+    }
+    @media (max-width: 1040px) {
+      .hero-grid { grid-template-columns: 1fr; gap: 40px; }
+    }
+
+    /* Holographic Operator Clearance Card (Top of Hero Left) */
+    .operator-id-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 18px;
+      padding: 12px 20px 12px 12px;
+      background: linear-gradient(135deg, rgba(0, 255, 163, 0.08), rgba(0, 229, 255, 0.03));
+      border: 1px solid rgba(0, 255, 163, 0.25);
+      box-shadow: var(--specular), 0 12px 30px rgba(0, 0, 0, 0.45);
+      clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px));
+      margin-bottom: 24px;
+      max-width: 100%;
+    }
+    .avatar-holo {
+      position: relative;
+      width: 74px;
+      height: 74px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .avatar-ring {
+      position: absolute;
+      inset: 0;
+      border: 1.5px dashed var(--acid);
+      border-radius: 50%;
+      animation: spin 16s linear infinite;
+    }
+    .avatar-ring-inner {
+      position: absolute;
+      inset: 5px;
+      border: 1px solid var(--cyan);
+      border-top-color: transparent;
+      border-bottom-color: transparent;
+      border-radius: 50%;
+      animation: spin-rev 9s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes spin-rev { to { transform: rotate(-360deg); } }
+
+    .avatar-holo img {
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1.5px solid var(--acid);
+      position: relative;
+      z-index: 2;
+    }
+
+    .id-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .id-top-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .clearance-pill {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 800;
+      padding: 2px 8px;
+      background: var(--acid);
+      color: #020408;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+    }
+    .signal-wave {
+      display: inline-flex;
+      align-items: flex-end;
+      gap: 2px;
+      height: 12px;
+    }
+    .signal-wave span {
+      width: 2px;
+      background: var(--cyan);
+      animation: wave-bar 1.1s ease-in-out infinite;
+    }
+    .signal-wave span:nth-child(1) { height: 4px; animation-delay: 0s; }
+    .signal-wave span:nth-child(2) { height: 10px; animation-delay: 0.15s; }
+    .signal-wave span:nth-child(3) { height: 6px; animation-delay: 0.3s; }
+    .signal-wave span:nth-child(4) { height: 12px; animation-delay: 0.45s; }
+    .signal-wave span:nth-child(5) { height: 5px; animation-delay: 0.6s; }
+    @keyframes wave-bar {
+      0%, 100% { transform: scaleY(0.45); opacity: 0.5; }
+      50% { transform: scaleY(1); opacity: 1; }
+    }
+
+    .typing-line {
+      font-family: var(--mono);
+      font-size: 12.5px;
+      color: var(--cyan);
+      min-height: 19px;
+    }
+
+    /* Metallic Chrome + Cyber Glow Headline */
+    .hero-kicker-code {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 2px;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .hero-kicker-code::before {
+      content: "";
+      width: 18px;
+      height: 2px;
+      background: var(--acid);
+      display: inline-block;
+    }
+
+    .hero-title {
+      font-family: var(--display);
+      font-size: clamp(50px, 7vw, 88px);
+      font-weight: 700;
+      line-height: 0.92;
+      letter-spacing: -2.2px;
+      text-transform: uppercase;
+      margin: 0;
+      background: linear-gradient(180deg, #ffffff 0%, #d8f8ff 55%, var(--acid) 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      filter: drop-shadow(0 10px 30px rgba(0, 255, 163, 0.18));
+      cursor: default;
+    }
+    [data-theme="light"] .hero-title {
+      background: linear-gradient(180deg, #090d16 0%, #1e293b 60%, #059669 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+    }
+
+    .hero-subtitle {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 14px;
+      font-family: var(--mono);
+      font-size: clamp(14px, 1.8vw, 18.5px);
+      font-weight: 700;
+      color: var(--acid);
+      letter-spacing: 0.8px;
+    }
+    .hero-subtitle .slash { color: var(--crimson); }
+
+    .hero-bio {
+      margin: 22px 0 26px;
+      color: var(--muted);
+      font-size: 15.8px;
+      line-height: 1.75;
+      max-width: 56ch;
+      padding: 14px 20px;
+      background: linear-gradient(90deg, rgba(0, 255, 163, 0.06), transparent);
+      border-left: 2px solid var(--acid);
+    }
+    .hero-bio b { color: var(--text); }
+
+    /* Architectural Telemetry Strip */
+    .open-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      padding: 18px 0;
+      margin: 24px 0 28px;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    @media (max-width: 600px) { .open-stats { grid-template-columns: repeat(2, 1fr); } }
+    .open-stat {
+      padding: 8px 14px;
+      background: rgba(255, 255, 255, 0.015);
+      border-left: 2px solid var(--acid);
+    }
+    .open-stat:nth-child(2n) { border-left-color: var(--cyan); }
+    .open-stat .num {
+      font-family: var(--display);
+      font-size: 34px;
+      font-weight: 700;
+      line-height: 1;
+      color: var(--text);
+    }
+    .open-stat .lbl {
       font-family: var(--mono);
       font-size: 10px;
       color: var(--muted);
       text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 6px;
     }
-    .music-info {
+
+    .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+    .tac-btn {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 13px 22px;
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      background: var(--bg-card);
+      color: var(--text);
+      border: 1px solid var(--border);
+      box-shadow: var(--specular);
+      clip-path: polygon(0 0, calc(100% - 11px) 0, 100% 11px, 100% 100%, 11px 100%, 0 calc(100% - 11px));
+      cursor: pointer;
+      transition: all 0.22s ease;
+    }
+    .tac-btn:hover {
+      border-color: var(--acid);
+      color: var(--acid);
+      background: var(--acid-dim);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(0, 255, 163, 0.18);
+    }
+    .tac-btn.primary {
+      background: linear-gradient(135deg, var(--acid), var(--cyan));
+      color: #020408;
+      border: none;
+      box-shadow: 0 0 28px var(--acid-glow);
+    }
+    .tac-btn.primary:hover {
+      color: #020408;
+      box-shadow: 0 0 38px rgba(0, 229, 255, 0.65);
+    }
+
+    /* =======================================================
+       MULTI-TAB PWNDBG STUDIO & EXPLOIT SIMULATOR (HERO RIGHT)
+       ======================================================= */
+    .pwn-console {
+      position: relative;
+      background: rgba(5, 8, 15, 0.9);
+      border: 1px solid rgba(0, 255, 163, 0.32);
+      box-shadow: var(--specular), 0 30px 80px rgba(0, 0, 0, 0.85), 0 0 40px rgba(0, 255, 163, 0.1);
+      clip-path: polygon(0 0, calc(100% - 22px) 0, 100% 22px, 100% 100%, 22px 100%, 0 calc(100% - 22px));
+      color: #d8e6f5;
+      font-family: var(--mono);
+      transform-style: preserve-3d;
+      transition: transform 0.15s ease-out;
+    }
+    .pwn-header {
+      padding: 10px 16px;
+      background: linear-gradient(90deg, rgba(0, 255, 163, 0.14), rgba(0, 229, 255, 0.04));
+      border-bottom: 1px solid rgba(0, 255, 163, 0.2);
       display: flex;
       align-items: center;
-      gap: 12px;
-    }
-    .music-controls {
-      display: flex;
+      justify-content: space-between;
       gap: 8px;
+      flex-wrap: wrap;
     }
-    .music-btn {
-      background: var(--panel2);
-      border: 1px solid var(--line);
-      color: var(--text);
-      width: 32px;
-      height: 32px;
-      border-radius: 8px;
+    .pwn-tabs {
       display: flex;
+      gap: 4px;
+    }
+    .pwn-tab {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #8499b1;
+      font-family: var(--mono);
+      font-size: 10.5px;
+      font-weight: 600;
+      padding: 4px 10px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .pwn-tab.active, .pwn-tab:hover {
+      background: var(--acid-dim);
+      border-color: var(--acid);
+      color: var(--acid);
+    }
+
+    .exploit-trigger-btn {
+      background: var(--crimson);
+      color: #fff;
+      border: none;
+      font-family: var(--mono);
+      font-size: 10.5px;
+      font-weight: 700;
+      padding: 5px 11px;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px));
+      box-shadow: 0 0 16px rgba(255, 42, 95, 0.55);
+      animation: pulse-crimson 2s infinite;
+    }
+    .exploit-trigger-btn:hover {
+      background: var(--acid);
+      color: #020408;
+      box-shadow: 0 0 22px var(--acid);
+    }
+    @keyframes pulse-crimson {
+      0%, 100% { box-shadow: 0 0 12px rgba(255, 42, 95, 0.45); }
+      50% { box-shadow: 0 0 24px rgba(255, 42, 95, 0.85); }
+    }
+
+    .pwn-regs {
+      padding: 11px 18px;
+      background: rgba(0, 0, 0, 0.55);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+      font-size: 11px;
+      line-height: 1.55;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px 12px;
+    }
+    .reg-name { color: var(--crimson); font-weight: 700; }
+    .reg-val { color: var(--cyan); }
+    .reg-sym { color: var(--acid); font-weight: 700; }
+    .reg-flash {
+      background: rgba(255, 42, 95, 0.4);
+      color: #fff !important;
+      padding: 0 4px;
+    }
+
+    .stack-visualizer {
+      padding: 10px 18px;
+      background: rgba(0, 229, 255, 0.025);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+      font-size: 10.5px;
+    }
+    .stack-vis-title {
+      display: flex;
+      justify-content: space-between;
+      color: #8499b1;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+    .stack-slots {
+      display: grid;
+      grid-template-columns: 1.3fr 1fr 1.2fr;
+      gap: 6px;
+    }
+    .stack-slot {
+      padding: 5px 8px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(0, 0, 0, 0.55);
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      transition: all 0.25s ease;
+    }
+    .stack-slot.corrupted {
+      border-color: var(--amber);
+      background: rgba(255, 184, 0, 0.14);
+    }
+    .stack-slot.pwned {
+      border-color: var(--acid);
+      background: rgba(0, 255, 163, 0.18);
+      box-shadow: 0 0 14px rgba(0, 255, 163, 0.35);
+    }
+    .slot-name { font-size: 9px; color: #8499b1; }
+    .slot-val { font-weight: 700; color: #f2f7ff; font-size: 10.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    .pwn-pane { display: none; }
+    .pwn-pane.active { display: block; }
+
+    .terminal-body {
+      padding: 14px 18px;
+      font-size: 12px;
+      line-height: 1.65;
+      max-height: 205px;
+      min-height: 195px;
+      overflow-y: auto;
+    }
+    .terminal-body::-webkit-scrollbar { width: 4px; }
+    .terminal-body::-webkit-scrollbar-thumb { background: rgba(0, 255, 163, 0.3); }
+
+    .code-line { margin-bottom: 5px; word-break: break-word; }
+    .code-line .m { color: var(--acid); font-weight: 700; }
+    .code-line .k { color: var(--cyan); font-weight: 600; }
+    .code-line .p { color: #7a92ab; }
+    .code-line .g { color: var(--acid); }
+    .code-line .y { color: var(--amber); }
+    .code-line .r { color: var(--crimson); font-weight: 700; }
+
+    .term-input-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(0, 255, 163, 0.04);
+    }
+    .term-prompt { color: var(--crimson); font-weight: 700; font-size: 12px; white-space: nowrap; }
+    .term-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #fff;
+      font-family: var(--mono);
+      font-size: 12px;
+    }
+    .term-quick {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      padding: 9px 18px 13px;
+      background: #020408;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .cmd-chip {
+      font-family: var(--mono);
+      font-size: 10.5px;
+      padding: 3px 9px;
+      background: rgba(0, 255, 163, 0.07);
+      border: 1px solid rgba(0, 255, 163, 0.25);
+      color: var(--acid);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .cmd-chip:hover {
+      background: var(--acid);
+      color: #020408;
+      font-weight: 700;
+    }
+
+    /* Section Headers */
+    .sec-block { margin-top: 88px; position: relative; }
+    .sec-head {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 36px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+      position: relative;
+    }
+    .sec-head::after {
+      content: "";
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 120px;
+      height: 3px;
+      background: linear-gradient(90deg, var(--acid), var(--cyan));
+      box-shadow: 0 0 16px var(--acid);
+    }
+    .sec-idx {
+      font-family: var(--mono);
+      font-size: 11.5px;
+      color: var(--acid);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      display: block;
+      margin-bottom: 4px;
+    }
+    .sec-head h2 {
+      margin: 0;
+      font-family: var(--display);
+      font-size: clamp(28px, 3.8vw, 42px);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .sec-meta { font-family: var(--mono); font-size: 11.5px; color: var(--cyan); }
+
+    /* =======================================================
+       SECTOR 01: OPERATIONS HUB WITH LIVE VISUAL PREVIEWS
+       ======================================================= */
+    .ops-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 22px;
+    }
+    @media (max-width: 820px) { .ops-grid { grid-template-columns: 1fr; } }
+
+    .op-module {
+      padding: 28px 30px;
+      clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 0 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 18px;
+    }
+    .op-module::before {
+      content: attr(data-index);
+      position: absolute;
+      right: 18px;
+      top: 6px;
+      font-family: var(--display);
+      font-size: 72px;
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.03);
+      line-height: 1;
+      pointer-events: none;
+    }
+    .op-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--acid);
+    }
+    .op-module:nth-child(2) .op-top, .op-module:nth-child(4) .op-top { color: var(--cyan); }
+
+    /* Bespoke Mini-Preview Graphic inside each Operations Card */
+    .op-preview {
+      padding: 10px 14px;
+      background: rgba(0, 0, 0, 0.42);
+      border: 1px solid var(--border);
+      border-left: 2px solid var(--acid);
+      font-family: var(--mono);
+      font-size: 11px;
+      color: #94a3b8;
+      line-height: 1.5;
+    }
+    .op-module:nth-child(2) .op-preview, .op-module:nth-child(4) .op-preview {
+      border-left-color: var(--cyan);
+    }
+    .op-preview b { color: var(--acid); font-weight: 600; }
+    .op-module:nth-child(2) .op-preview b, .op-module:nth-child(4) .op-preview b { color: var(--cyan); }
+
+    .op-module h3 {
+      margin: 4px 0 6px;
+      font-family: var(--display);
+      font-size: 25px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    .op-module p { margin: 0; color: var(--muted); font-size: 14.5px; line-height: 1.65; }
+    .op-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding-top: 14px;
+      border-top: 1px dashed var(--border);
+    }
+    .tags { display: flex; gap: 6px; flex-wrap: wrap; }
+    .tag {
+      font-family: var(--mono);
+      font-size: 10.5px;
+      padding: 3px 9px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
+    .op-go {
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--acid);
+      text-transform: uppercase;
+      transition: transform 0.2s;
+    }
+    .op-module:hover .op-go { transform: translateX(4px); }
+
+    /* =======================================================
+       SECTOR 02: TACTICAL RADAR + ARSENAL MATRIX
+       ======================================================= */
+    .arsenal-layout {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 24px;
+      align-items: stretch;
+    }
+    @media (max-width: 1020px) { .arsenal-layout { grid-template-columns: 1fr; } }
+
+    .radar-panel {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 18px 100%, 0 calc(100% - 18px));
+    }
+    .radar-head {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--acid);
+      margin-bottom: 10px;
+    }
+    .radar-svg { width: 100%; max-width: 265px; height: auto; overflow: visible; }
+    .radar-poly {
+      fill: rgba(0, 255, 163, 0.18);
+      stroke: var(--acid);
+      stroke-width: 2;
+      filter: drop-shadow(0 0 12px rgba(0, 255, 163, 0.45));
+      animation: radar-pulse 4s ease-in-out infinite;
+    }
+    @keyframes radar-pulse {
+      0%, 100% { fill-opacity: 0.18; }
+      50% { fill-opacity: 0.34; }
+    }
+
+    .arsenal-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    @media (max-width: 860px) { .arsenal-grid { grid-template-columns: 1fr; } }
+
+    .arsenal-col {
+      padding: 24px;
+      border-top: 2px solid var(--acid);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .arsenal-col:nth-child(2) { border-top-color: var(--cyan); }
+    .arsenal-col:nth-child(3) { border-top-color: var(--amber); }
+
+    .arsenal-col-head {
+      font-family: var(--mono);
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--acid);
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .arsenal-col:nth-child(2) .arsenal-col-head { color: var(--cyan); }
+    .arsenal-col:nth-child(3) .arsenal-col-head { color: var(--amber); }
+
+    .skill-row { margin-bottom: 16px; }
+    .skill-row:last-child { margin-bottom: 0; }
+    .skill-meta {
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--mono);
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+    .skill-meta .lvl { color: var(--muted); font-size: 10.5px; }
+    .seg-bar { height: 7px; background: rgba(255, 255, 255, 0.06); position: relative; overflow: hidden; }
+    .seg-fill {
+      height: 100%;
+      background: repeating-linear-gradient(90deg, var(--acid), var(--acid) 8px, transparent 8px, transparent 10px);
+    }
+    .arsenal-col:nth-child(2) .seg-fill {
+      background: repeating-linear-gradient(90deg, var(--cyan), var(--cyan) 8px, transparent 8px, transparent 10px);
+    }
+    .arsenal-col:nth-child(3) .seg-fill {
+      background: repeating-linear-gradient(90deg, var(--amber), var(--amber) 8px, transparent 8px, transparent 10px);
+    }
+
+    .heatmap-strip {
+      margin-top: 22px;
+      padding: 18px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .heatmap-title { font-family: var(--mono); font-size: 11.5px; color: var(--muted); }
+    .heatmap-title b { color: var(--acid); }
+    .heatmap-cells { display: grid; grid-template-columns: repeat(28, 12px); gap: 4px; overflow-x: auto; }
+    .hm-cell { width: 12px; height: 12px; background: rgba(255, 255, 255, 0.05); border-radius: 2px; }
+    .hm-cell.l1 { background: rgba(0, 255, 163, 0.25); }
+    .hm-cell.l2 { background: rgba(0, 255, 163, 0.55); }
+    .hm-cell.l3 { background: var(--acid); box-shadow: 0 0 8px var(--acid-glow); }
+
+    /* =======================================================
+       SECTOR 03: DOSSIER & ACTIVE DIRECTIVES
+       ======================================================= */
+    .dossier-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    @media (max-width: 880px) { .dossier-grid { grid-template-columns: 1fr; } }
+
+    .dossier-panel {
+      padding: 30px;
+      clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 0 100%);
+    }
+    .dossier-quote { font-size: 16px; line-height: 1.75; color: var(--text); margin: 0 0 20px; }
+    .trait-tags { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 24px; }
+    .trait {
+      font-family: var(--mono);
+      font-size: 11px;
+      padding: 6px 12px;
+      border: 1px solid rgba(0, 255, 163, 0.28);
+      background: var(--acid-dim);
+      color: var(--acid);
+    }
+
+    .directive-box {
+      padding: 18px 20px;
+      border-left: 3px solid var(--acid);
+      background: rgba(0, 0, 0, 0.32);
+      margin-bottom: 16px;
+    }
+    .directive-box:last-child { margin-bottom: 0; border-left-color: var(--cyan); }
+    .dir-top {
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--acid);
+      margin-bottom: 6px;
+    }
+    .directive-box:last-child .dir-top { color: var(--cyan); }
+    .dir-title { font-family: var(--display); font-size: 20px; font-weight: 700; text-transform: uppercase; }
+    .dir-desc { font-size: 13.5px; color: var(--muted); margin-top: 4px; }
+
+    /* Bottom tmux Status Dock */
+    .tmux-dock {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 950;
+      background: rgba(2, 4, 8, 0.94);
+      border-top: 1px solid var(--border);
+      backdrop-filter: blur(14px);
+      font-family: var(--mono);
+      font-size: 11.5px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 18px;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    [data-theme="light"] .tmux-dock { background: rgba(238, 242, 246, 0.95); }
+    .tmux-left, .tmux-right { display: flex; align-items: center; gap: 12px; }
+    .tmux-mode {
+      background: linear-gradient(135deg, var(--acid), var(--cyan));
+      color: #020408;
+      font-weight: 800;
+      padding: 2px 9px;
+      text-transform: uppercase;
+    }
+    .music-inline { display: flex; align-items: center; gap: 8px; }
+    .music-btn {
+      background: var(--acid-dim);
+      border: 1px solid rgba(0, 255, 163, 0.3);
+      color: var(--acid);
+      width: 24px;
+      height: 24px;
+      display: inline-flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      transition: all 0.2s;
+      font-size: 10px;
     }
-    .music-btn:hover { background: var(--line); transform: translateY(-2px); }
-    .song-title {
-      font-size: 13px;
-      font-weight: 600;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      flex: 1;
-    }
+    .music-btn:hover { background: var(--acid); color: #020408; }
     .playlist-menu {
       background: var(--bg);
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      padding: 4px;
-      font-size: 12px;
+      border: 1px solid var(--border);
       color: var(--text);
-      outline: none;
-      width: 100%;
-    }
-
-    /* Request Counter Widget */
-    .request-stats {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      padding: 12px 18px;
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 12px;
       font-family: var(--mono);
-      font-size: 12px;
-      z-index: 1000;
-      backdrop-filter: blur(12px);
-      color: var(--text);
-      box-shadow: var(--shadow);
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
+      font-size: 11px;
+      padding: 2px 6px;
+      outline: none;
+      max-width: 190px;
     }
-    .request-stats .label { color: var(--muted); font-size: 10px; text-transform: uppercase; }
-    .request-stats .value { color: var(--brand2); font-weight: bold; }
 
-    .hero-left{
-      padding: 40px;
+    /* Command Palette Modal */
+    .cmd-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.78);
+      backdrop-filter: blur(6px);
+      z-index: 2000;
+      display: none;
+      align-items: flex-start;
       justify-content: center;
-      gap:24px;
+      padding: 12vh 16px 16px;
     }
-    .avatar-wrap{
+    .cmd-overlay.open { display: flex; }
+    .cmd-modal {
+      width: 100%;
+      max-width: 540px;
+      background: #040810;
+      border: 1px solid var(--acid);
+      clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px));
+      box-shadow: 0 0 45px rgba(0, 255, 163, 0.25);
+      overflow: hidden;
+    }
+    .cmd-search-wrap {
       display: flex;
       align-items: center;
-      gap: 20px;
+      gap: 10px;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      color: var(--acid);
     }
-    .avatar{
-      width: 110px;
-      height: 110px;
-      border-radius: 30px;
-      border: 2px solid var(--line);
-      padding: 6px;
-      background: var(--bg);
-      object-fit: cover;
-      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-    .avatar:hover{
-      transform: scale(1.05) rotate(-3deg);
-      border-color: var(--brand);
-    }
-    .kicker{
-      display:inline-flex; gap:10px; align-items:center;
-      padding:10px 18px;
-      border-radius:999px;
-      background: var(--panel2);
-      color:var(--muted);
-      font-family:var(--mono);
-      font-size:13px;
-      border: 1px solid var(--line);
-    }
-    .kicker .ping{
-      width:8px; height:8px; border-radius:50%;
-      background: #22c55e;
-      box-shadow: 0 0 10px #22c55e;
-    }
-    h1{
-      margin:0;
-      font-size: clamp(34px, 5vw, 48px);
-      line-height:1.1;
-      font-weight: 800;
-      letter-spacing: -1.5px;
-    }
-    .grad{
-      background: linear-gradient(135deg, var(--grad-start) 30%, var(--grad-end));
-      -webkit-background-clip:text;
-      background-clip:text;
-      color:transparent;
-    }
-    .sub{
-      margin:0;
-      color:var(--muted);
-      font-size:17px;
-      line-height:1.6;
-      max-width:50ch;
-    }
-    .chips{
-      display:flex; flex-wrap:wrap; gap:10px;
-    }
-    .chip{
-      font-family:var(--mono);
-      font-size:12px;
-      padding:8px 16px;
-      border-radius:999px;
-      border:1px solid var(--line);
-      background: var(--panel);
-      color: var(--muted);
-      transition: all 0.2s ease;
-      font-weight: 500;
-    }
-    .chip:hover{
-      background: var(--panel2);
-      color: var(--text);
-      transform: translateY(-2px);
-      border-color: var(--brand2);
-    }
-
-    .actions{display:flex; gap:16px; flex-wrap:wrap}
-    .btn{
-      display:inline-flex; align-items:center; gap:12px;
-      padding:14px 24px;
-      border-radius: 16px;
-      border:1px solid var(--line);
-      background: var(--panel2);
-      color:var(--text);
-      font-weight:600;
-      transition: all 0.2s ease;
-    }
-    .btn:hover{
-      background: var(--line);
-      transform: translateY(-2px);
-    }
-    .btn.primary{
-      background: var(--text);
-      color: var(--bg);
+    .cmd-search {
+      flex: 1;
+      background: transparent;
       border: none;
+      outline: none;
+      color: #fff;
+      font-size: 14px;
+      font-family: var(--mono);
     }
-    .btn.primary:hover{
-      background: var(--btn-primary-hover, #fff);
-      box-shadow: 0 10px 20px var(--btn-primary-shadow, rgba(255,255,255,0.1));
+    .cmd-list { max-height: 300px; overflow-y: auto; padding: 8px; }
+    .cmd-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      color: #e6f1ff;
+      font-family: var(--mono);
+      font-size: 13px;
+      cursor: pointer;
     }
-    [data-theme="light"] .btn.primary:hover {
-      --btn-primary-hover: #000;
-      --btn-primary-shadow: rgba(0,0,0,0.1);
-    }
-    .btn svg{opacity:.9}
+    .cmd-item:hover { background: var(--acid-dim); color: var(--acid); }
+    .cmd-hint { color: var(--muted); font-size: 11px; }
 
-    .hero-right{
-      padding:24px;
-      display:flex;
-      flex-direction: column;
-      gap:24px;
+    .toast {
+      position: fixed;
+      bottom: 52px;
+      right: 24px;
+      background: var(--acid);
+      color: #020408;
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 10px 18px;
+      clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+      opacity: 0;
+      transform: translateY(10px);
+      pointer-events: none;
+      transition: all 0.25s ease;
+      z-index: 2100;
     }
-    .mini{
-      padding:24px;
-      border-radius: 20px;
-      background: var(--panel2);
-      border: 1px solid var(--line);
-    }
-    .mini h3{margin:0 0 20px; font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:1px}
-    .stats{display:grid; grid-template-columns:1fr 1fr; gap:16px}
-    .stat{
-      padding:16px;
-      border-radius: 16px;
-      background: var(--bg);
-      border: 1px solid var(--line);
-    }
-    .stat .n{font-size:24px; font-weight:800; color:var(--brand2)}
-    .stat .t{color:var(--muted); font-size:11px; margin-top:4px; font-weight:600; text-transform: uppercase}
+    .toast.show { opacity: 1; transform: translateY(0); }
 
-    .terminal{
-      flex:1;
-      font-family:var(--mono);
-      background: #000;
-      border:1px solid var(--line);
-      border-radius: 20px;
-      padding:20px;
-      box-shadow: inset 0 0 40px rgba(0,0,0,0.5);
-      position: relative;
-    }
-    .term-top{
-      display:flex; align-items:center; gap:8px; margin-bottom:16px;
-    }
-    .dotw, .doty, .dotg{width:10px; height:10px; border-radius:50%}
-    .dotw{background:#ff5f56}
-    .doty{background:#ffbd2e}
-    .dotg{background:#27c93f}
-
-    .code{font-size:13px; line-height:1.7; color:#cbd5e1}
-    .code .m{color:var(--brand2); font-weight:bold}
-    .code .k{color:var(--brand)}
-    .code .p{color:#64748b}
-    .cursor{
-      display: inline-block;
-      width: 8px;
-      height: 15px;
-      background: var(--brand2);
-      margin-left: 4px;
-      animation: blink 1s infinite;
-      vertical-align: middle;
-    }
-    @keyframes blink { 50% { opacity: 0 } }
-
-    /* Sections */
-    section{margin-top:40px}
-    .grid{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:24px;
-    }
-    @media (max-width: 900px){ .grid{grid-template-columns:1fr} }
-
-    .section-card{padding:40px}
-    .section-title{
-      display:flex; align-items:center; justify-content:space-between; gap:16px;
-      margin-bottom:32px;
-    }
-    .section-title h2{margin:0; font-size:26px; font-weight:800; letter-spacing:-0.5px}
-    .section-title span{color:var(--muted); font-size:13px; font-family:var(--mono)}
-    .hr{height:1px; background:var(--line); margin:24px 0}
-
-    /* Skills */
-    .skills{display:flex; flex-wrap:wrap; gap:12px}
-    .skill{
-      padding:12px 20px;
-      border-radius: 16px;
-      background: var(--panel2);
-      border: 1px solid var(--line);
-      display:flex; gap:12px; align-items:center;
-      font-size:15px;
-      font-weight: 500;
-      transition: all 0.2s ease;
-    }
-    .skill:hover{
-      border-color: var(--brand2);
-      transform: translateY(-2px);
-    }
-    .badge{
-      width:8px; height:8px; border-radius:50%;
-      background: linear-gradient(135deg, var(--brand), var(--brand2));
-    }
-
-    /* Projects */
-    .projects{display:grid; grid-template-columns:1fr 1fr; gap:20px}
-    @media (max-width: 700px){ .projects{grid-template-columns:1fr} }
-    .project{
-      padding:28px;
-      border-radius: 24px;
-      background: var(--panel2);
-      border: 1px solid var(--line);
-      transition: all 0.3s ease;
-    }
-    .project:hover{
-      border-color: var(--brand2);
-      background: var(--panel);
-      transform: translateY(-4px);
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-    }
-    .project h3{margin:0 0 12px; font-size:20px; font-weight:700}
-    .project p{margin:0 0 20px; color:var(--muted); font-size:15px; line-height:1.6}
-    .tags{display:flex; flex-wrap:wrap; gap:8px}
-    .tag{
-      font-family:var(--mono);
-      font-size:11px;
-      padding:6px 12px;
-      border-radius:10px;
-      background: var(--bg);
-      border: 1px solid var(--line);
+    footer {
+      margin-top: 72px;
+      padding: 28px 0;
+      border-top: 1px solid var(--border);
       color: var(--muted);
+      font-family: var(--mono);
+      font-size: 12px;
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
     }
 
-    /* Footer */
-    footer{
-      margin-top:60px;
-      padding:40px 0;
-      border-top:1px solid var(--line);
-      color:var(--muted);
-      font-size:14px;
-      display:flex; justify-content:space-between; gap:20px; flex-wrap:wrap;
-    }
-
-    /* Reveal */
-    .reveal{opacity:0; transform: translateY(20px); transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1)}
-    .reveal.show{opacity:1; transform:none}
+    .reveal { opacity: 0; transform: translateY(18px); transition: all 0.55s ease; }
+    .reveal.show { opacity: 1; transform: none; }
   </style>
 </head>
 
 <body>
-  <div class="nav">
+  <div class="laser-scan"></div>
+  <canvas id="bg-canvas"></canvas>
+
+  <div id="cursor-reticle" class="cursor-reticle"></div>
+  <div id="cursor-coords" class="cursor-coords">0x000 : 0x000</div>
+
+  <header class="hud-header">
+    <div class="telemetry-bar">
+      <div>SYS.KERNEL: <span class="t-val">6.8.0-RING0-x86_64</span> // MITIGATIONS: <span class="t-cyan">FULL_RELRO + NX + PIE</span></div>
+      <div>LAT/LON: <span class="t-val">10.8231°N, 106.6297°E</span> // CLOCK: <span id="hud-clock" class="t-val">--:--:--</span></div>
+    </div>
+
     <div class="nav-inner">
       <a class="brand" href="#top" aria-label="Home">
-        <span class="dot"></span>
-        <span>Shiinn</span>
+        <span class="brand-mark">0x</span>
+        <span data-scramble="SHIINN">SHIINN</span>
+        <span class="sub-id">PWN // RESEARCH</span>
       </a>
 
-      <div class="menu">
-        <a href="#about">About</a>
-        <a href="#skills">Skills</a>
-        <a href="#projects">Projects</a>
-        <a href="#contact" class="cta">Contact</a>
-        <button id="theme-toggle" class="theme-btn" aria-label="Toggle theme">
-          <svg class="sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42m12.72-12.72l1.42-1.42"/></svg>
-          <svg class="moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      <nav class="menu" aria-label="Main Navigation">
+        <a href="#projects">01.Hub</a>
+        <a href="#skills">02.Arsenal</a>
+        <a href="#about">03.Dossier</a>
+        <a href="writeups.html">Writeups</a>
+        <a href="api.html">APIs</a>
+        <a href="blog.html">Blog</a>
+        <a href="#contact" class="cta">Uplink</a>
+        <button id="sfx-toggle" class="hud-icon-btn" type="button" title="Toggle Cyber UI Sound Effects">
+          <span id="sfx-label">🔊 SFX</span>
         </button>
-      </div>
+        <button id="open-cmd" class="hud-icon-btn" type="button" title="Command Palette (Ctrl+K)">
+          <span>⌘K</span>
+        </button>
+        <button id="theme-toggle" class="hud-icon-btn" type="button" aria-label="Toggle theme">
+          <svg class="sun" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42m12.72-12.72l1.42-1.42"/></svg>
+          <svg class="moon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+      </nav>
     </div>
-  </div>
+  </header>
 
   <main id="top" class="wrap">
-    <div class="hero">
-      <div class="card hero-left reveal">
-        <div class="avatar-wrap">
-          <img src="Anh/download.jpg" alt="Phước Toàn" class="avatar">
-          <div class="kicker"><span class="ping"></span><span id="typing">Learning pwn. Breaking assumptions. Understanding systems.</span></div>
-        </div>
-        <h1>
-          <span class="grad">Phước Toàn (Shiinn)</span><br/>
-          <span style="opacity:.8; font-size: 0.8em;">Pwn & Security Research</span>
-        </h1>
-        <p class="sub">
-          Chia sẻ writeup, tool và quá trình học tập nghiêm túc.
-        </p>
-
-        <div class="chips" aria-label="Highlights">
-          <span class="chip">📍 Viet Nam</span>
-          <span class="chip">🧠 Focus: Pwn + Security</span>
-          <span class="chip">🧰 Linux, Git, Docker</span>
-          <span class="chip">⚡ Always Learning</span>
-        </div>
-
-        <div class="actions">
-          <a class="btn primary" href="#projects">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
-            Xem project
-          </a>
-          <a class="btn" href="https://github.com/" target="_blank" rel="noreferrer">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.604-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.464-1.11-1.464-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482C19.138 20.161 22 16.416 22 12c0-5.523-4.477-10-10-10z"/></svg>
-            GitHub
-          </a>
-          <a class="btn" href="#contact">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-            Liên hệ
-          </a>
-        </div>
-      </div>
-
-      <div class="card hero-right reveal">
-        <div class="mini">
-          <h3>Quick stats</h3>
-          <div class="stats">
-            <div class="stat">
-              <div class="n">30+</div>
-              <div class="t">CTF solves</div>
+    <!-- ==========================================
+         HERO STAGE — HOLOGRAPHIC OPERATOR + PWN STUDIO
+         ========================================== -->
+    <section class="hero-stage reveal">
+      <div class="hero-grid">
+        <!-- Left: Holographic Operator Badge & Monument Typography -->
+        <div>
+          <div class="operator-id-badge">
+            <div class="avatar-holo">
+              <div class="avatar-ring"></div>
+              <div class="avatar-ring-inner"></div>
+              <img src="Anh/download.jpg" alt="Phước Toàn (0xShiinn)">
             </div>
-            <div class="stat">
-              <div class="n">10+</div>
-              <div class="t">Projects</div>
-            </div>
-            <div class="stat">
-              <div class="n">2y</div>
-              <div class="t">Linux daily</div>
-            </div>
-            <div class="stat">
-              <div class="n">∞</div>
-              <div class="t">Curiosity</div>
+            <div class="id-meta">
+              <div class="id-top-row">
+                <span class="clearance-pill">CLEARANCE // LEVEL-0</span>
+                <div class="signal-wave" title="Live Telemetry Signal">
+                  <span></span><span></span><span></span><span></span><span></span>
+                </div>
+                <span style="font-family:var(--mono); font-size:10px; color:var(--muted)">ID: 0x5348494E</span>
+              </div>
+              <div class="typing-line">&gt; <span id="typing">Learning pwn. Breaking assumptions.</span></div>
             </div>
           </div>
-        </div>
 
-        <div class="terminal" aria-label="Terminal">
-          <div class="term-top">
-            <span class="dotw"></span><span class="doty"></span><span class="dotg"></span>
-            <span style="margin-left:8px; color:rgba(255,255,255,0.65); font-size:12px">~/portfolio</span>
+          <div>
+            <span class="hero-kicker-code">BINARY EXPLOITATION &amp; KERNEL SECURITY LAB</span>
+            <h1 class="hero-title" data-scramble="PHƯỚC TOÀN">PHƯỚC TOÀN</h1>
+            <div class="hero-subtitle">
+              <span class="slash">//</span>
+              <span>[0xSHIINN] — PWN &amp; LOW-LEVEL SECURITY RESEARCH</span>
+            </div>
           </div>
-          <div class="code">
-            <div><span class="m">$</span> whoami</div>
-            <div><span class="k">shiinn</span></div>
-            <div style="height:8px"></div>
-            <div><span class="m">$</span> cat focus.txt</div>
-            <div><span class="p">web</span>, <span class="p">security</span>, <span class="p">automation</span></div>
-            <div style="height:8px"></div>
-            <div><span class="m">$</span> echo "ship it"</div>
-            <div>ship it<span class="cursor"></span></div>
+
+          <p class="hero-bio">
+            Chia sẻ <b>CTF writeups</b>, <b>exploit scripts</b> và quá trình đào sâu vào bản chất hệ thống từ tầng thấp (binary exploitation, Linux kernel, memory corruption) đến bảo mật ứng dụng.
+          </p>
+
+          <div class="open-stats">
+            <div class="open-stat">
+              <div class="num">30+</div>
+              <div class="lbl">CTF Pwned</div>
+            </div>
+            <div class="open-stat">
+              <div class="num">10+</div>
+              <div class="lbl">Exploit Tools</div>
+            </div>
+            <div class="open-stat">
+              <div class="num">2Y+</div>
+              <div class="lbl">Linux Daily</div>
+            </div>
+            <div class="open-stat">
+              <div class="num">∞</div>
+              <div class="lbl">Curiosity</div>
+            </div>
+          </div>
+
+          <div class="hero-actions">
+            <a class="tac-btn primary" href="writeups.html">
+              [01] EXPLOIT WRITEUPS →
+            </a>
+            <button id="hero-pwn-btn" type="button" class="tac-btn" style="border-color:rgba(255,42,95,0.5); color:var(--crimson)">
+              ⚡ SIMULATE BUFFER OVERFLOW
+            </button>
+            <a class="tac-btn" href="https://github.com/0xshijn" target="_blank" rel="noreferrer">
+              GITHUB // 0xSHIJN
+            </a>
           </div>
         </div>
-      </div>
-    </div>
 
-    <section id="about" class="grid">
-      <div class="card section-card reveal">
-        <div class="section-title">
-          <h2>About</h2><span>story, but short</span>
-        </div>
-        <div class="hr"></div>
-        <p style="margin:0; color:var(--muted); line-height:1.7">
-          Mình thích kiểu làm việc truyền thống: <b>Tính cách mình có phần hơi nóng và ẩu</b>.
-          Portfolio này là nơi mình gom lại thứ đã làm ra được.
-        </p>
-        <div style="margin-top:14px; display:flex; gap:10px; flex-wrap:wrap">
-          <span class="chip">Tính cách: thực tế</span>
-          <span class="chip">Ưu tiên: chất lượng</span>
-          <span class="chip">Nguyên tắc: nói ít làm nhiều</span>
-        </div>
-      </div>
-
-      <div class="card section-card reveal" id="skills">
-        <div class="section-title">
-          <h2>Skills</h2><span>stack mình dùng</span>
-        </div>
-        <div class="hr"></div>
-        <div class="skills">
-          <span class="skill"><span class="badge"></span>HTML/CSS/JS</span>
-          <span class="skill"><span class="badge"></span>React (tuỳ dự án)</span>
-          <span class="skill"><span class="badge"></span>Node/Python</span>
-          <span class="skill"><span class="badge"></span>Linux + Git</span>
-          <span class="skill"><span class="badge"></span>Docker</span>
-          <span class="skill"><span class="badge"></span>CTF Pwn basics</span>
-          <span class="skill"><span class="badge"></span>Web security mindset</span>
-        </div>
-      </div>
-    </section>
-
-    <section id="projects" class="card section-card reveal">
-      <div class="section-title">
-        <h2>Projects</h2><span>chọn vài cái tiêu biểu</span>
-      </div>
-      <div class="hr"></div>
-
-      <div class="projects">
-        <a class="project" href="writeups.html">
-          <h3>CTF Writeups</h3>
-          <p>Tổng hợp writeup, notes, tooling. Đỡ phải nhớ mọi thứ trong đầu (đầu người dễ crash).</p>
-          <div class="tags">
-            <span class="tag">pwn</span><span class="tag">notes</span><span class="tag">markdown</span>
+        <!-- Right: Multi-Tab Pwndbg Studio & Live Stack Exploit Simulator -->
+        <div id="pwn-console" class="pwn-console" aria-label="Pwndbg Interactive Studio">
+          <div class="pwn-header">
+            <div class="pwn-tabs">
+              <button type="button" class="pwn-tab active" data-pane="pane-shell">01.PWNDBG_SHELL</button>
+              <button type="button" class="pwn-tab" data-pane="pane-disasm">02.DISASM_WIN</button>
+              <button type="button" class="pwn-tab" data-pane="pane-rop">03.ROP_PAYLOAD</button>
+            </div>
+            <button id="run-exploit-btn" type="button" class="exploit-trigger-btn">⚡ LAUNCH EXPLOIT</button>
           </div>
-        </a>
 
-        <a class="project" href="api.html">
-          <h3>Public APIs</h3>
-          <p>Danh sách các API công khai hỗ trợ pentest, tra cứu dữ liệu và tự động hóa.</p>
-          <div class="tags">
-            <span class="tag">rest</span><span class="tag">json</span><span class="tag">backend</span>
+          <!-- Live CPU Register Dump -->
+          <div class="pwn-regs">
+            <div><span class="reg-name">RAX</span> <span id="reg-rax" class="reg-val">0x0000000000000000</span></div>
+            <div><span class="reg-name">RDI</span> <span id="reg-rdi" class="reg-val">0x00007fffffffe410</span></div>
+            <div><span class="reg-name">RBP</span> <span id="reg-rbp" class="reg-val">0x00007fffffffe3f0</span></div>
+            <div><span class="reg-name">RIP</span> <span id="reg-rip" class="reg-sym">0x401142 &lt;vuln+28&gt;</span></div>
           </div>
-        </a>
 
-        <a class="project" href="blog.html">
-          <h3>Daily Blog</h3>
-          <p>Nhật ký học tập, ghi chép linh tinh và quá trình phát triển bản thân mỗi ngày.</p>
-          <div class="tags">
-            <span class="tag">diary</span><span class="tag">learning</span><span class="tag">daily</span>
+          <!-- Visual Stack Frame Memory Layout -->
+          <div class="stack-visualizer">
+            <div class="stack-vis-title">
+              <span>STACK FRAME TELEMETRY [0x7fffffffe3d0]</span>
+              <span id="stack-status" style="color:var(--acid)">STATE: NORMAL</span>
+            </div>
+            <div class="stack-slots">
+              <div id="slot-buf" class="stack-slot">
+                <span class="slot-name">char buf[40]</span>
+                <span id="val-buf" class="slot-val">"shiinn_input\0"</span>
+              </div>
+              <div id="slot-rbp" class="stack-slot">
+                <span class="slot-name">Saved RBP (8B)</span>
+                <span id="val-rbp" class="slot-val">0x7fffffffe3f0</span>
+              </div>
+              <div id="slot-ret" class="stack-slot">
+                <span class="slot-name">Return Addr (RIP)</span>
+                <span id="val-ret" class="slot-val">0x401142 &lt;main&gt;</span>
+              </div>
+            </div>
           </div>
-        </a>
 
-        <a class="project" href="projects.html">
-          <h3>Mini Web App</h3>
-          <p>mấy cái mình thấy thú vị và nhiều cái sưu tầm.</p>
-          <div class="tags">
-            <span class="tag">frontend</span><span class="tag">ux</span><span class="tag">ship</span>
+          <!-- Tab 1: Interactive Shell -->
+          <div id="pane-shell" class="pwn-pane active">
+            <div id="term-output" class="terminal-body">
+              <div class="code-line"><span class="p">pwndbg&gt;</span> checksec --file=./vuln_kernel</div>
+              <div class="code-line">Arch: <span class="g">amd64-64-little</span> | Stack: <span class="r">No canary</span> | NX: <span class="g">Enabled</span> | PIE: <span class="y">No PIE (0x400000)</span></div>
+              <div class="code-line"><span class="p">pwndbg&gt;</span> x/i 0x4011d6</div>
+              <div class="code-line">0x4011d6 &lt;<span class="g">win_shell</span>&gt;:  mov rdi, 0x402008 <span class="p">; "/bin/sh"</span></div>
+              <div class="code-line"><span class="p"># Click </span><span class="r">[⚡ LAUNCH EXPLOIT]</span><span class="p"> to watch live stack corruption &amp; RIP hijack!</span></div>
+            </div>
+
+            <div class="term-input-row">
+              <span class="term-prompt">pwndbg&gt;</span>
+              <input id="term-input" class="term-input" type="text" placeholder="Type: exploit, help, vmmap, checksec, flag, clear..." autocomplete="off" spellcheck="false" />
+            </div>
+
+            <div class="term-quick">
+              <button type="button" class="cmd-chip" data-cmd="exploit">⚡ exploit</button>
+              <button type="button" class="cmd-chip" data-cmd="help">help</button>
+              <button type="button" class="cmd-chip" data-cmd="vmmap">vmmap</button>
+              <button type="button" class="cmd-chip" data-cmd="ls">ls</button>
+              <button type="button" class="cmd-chip" data-cmd="flag">cat flag.txt</button>
+              <button type="button" class="cmd-chip" data-cmd="clear">clear</button>
+            </div>
           </div>
-        </a>
-      </div>
-    </section>
 
-    <section id="contact" class="grid">
-      <div class="card section-card reveal">
-        <div class="section-title">
-          <h2>Contact</h2><span>ping mình</span>
-        </div>
-        <div class="hr"></div>
-
-        <p style="margin:0 0 12px; color:var(--muted); line-height:1.7">
-cậu có thể tìm tớ qua các liên kết mạng xã hội phía bên dưới nha <3        </p>
-
-        <div style="display:flex; gap:10px; flex-wrap:wrap">
-          <a class="btn" href="mailto:0xshiinnn@gmail.com">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 7-8.97 5.7a1.94 19.4 0 0 1-2.06 0L2 7"/><rect width="20" height="16" x="2" y="4" rx="2"/></svg>
-            Gmail
-          </a>
-          <a class="btn" href="https://facebook.com/phwctoazn" target="_blank" rel="noreferrer">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
-            Facebook
-          </a>
-          <a class="btn" href="https://instagram.com/_phwctoazn" target="_blank" rel="noreferrer">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
-            Instagram
-          </a>
-        </div>
-      </div>
-
-      <div class="card section-card reveal">
-        <div class="section-title">
-          <h2>Current Mission</h2><span>đang thực thi</span>
-        </div>
-        <div class="hr"></div>
-        <div style="display:flex; flex-direction:column; gap:16px">
-          <div style="background:rgba(255,255,255,0.03); padding:16px; border-radius:12px; border:1px solid var(--line)">
-            <div style="font-family:var(--mono); font-size:12px; color:var(--brand2); margin-bottom:8px"># LEARNING_PATH</div>
-            <div style="font-weight:600">Advanced Linux Kernel Exploitation</div>
-            <div style="font-size:13px; color:var(--muted); margin-top:4px">Nghiên cứu sâu về heap grooming và bypass KASLR.</div>
+          <!-- Tab 2: Disassembly View -->
+          <div id="pane-disasm" class="pwn-pane">
+            <div class="terminal-body" style="max-height:285px">
+              <div class="code-line"><span class="p">Dump of assembler code for function </span><span class="g">win_shell</span><span class="p">:</span></div>
+              <div class="code-line"><span class="k">0x004011d6</span> &lt;+0&gt;:   endbr64</div>
+              <div class="code-line"><span class="k">0x004011da</span> &lt;+4&gt;:   push   rbp</div>
+              <div class="code-line"><span class="k">0x004011db</span> &lt;+5&gt;:   mov    rbp, rsp</div>
+              <div class="code-line"><span class="k">0x004011de</span> &lt;+8&gt;:   lea    rdi, [rip+0xe23] <span class="y"># 0x402008 "/bin/sh"</span></div>
+              <div class="code-line"><span class="g">0x004011e5</span> &lt;+15&gt;:  call   0x401050 &lt;<span class="r">system@plt</span>&gt;</div>
+              <div class="code-line"><span class="k">0x004011ea</span> &lt;+20&gt;:  nop</div>
+              <div class="code-line"><span class="k">0x004011eb</span> &lt;+21&gt;:  pop    rbp</div>
+              <div class="code-line"><span class="k">0x004011ec</span> &lt;+22&gt;:  ret</div>
+            </div>
           </div>
-          <div style="background:rgba(255,255,255,0.03); padding:16px; border-radius:12px; border:1px solid var(--line)">
-            <div style="font-family:var(--mono); font-size:12px; color:var(--brand); margin-bottom:8px"># CURRENT_GOAL</div>
-            <div style="font-weight:600">OSCP Certification</div>
-            <div style="font-size:13px; color:var(--muted); margin-top:4px">Mục tiêu đạt chứng chỉ trong năm 2026.</div>
+
+          <!-- Tab 3: Pwntools Script View -->
+          <div id="pane-rop" class="pwn-pane">
+            <div class="terminal-body" style="max-height:285px">
+              <div class="code-line"><span class="p">#!/usr/bin/env python3 — 0xShiinn Exploit Template</span></div>
+              <div class="code-line"><span class="k">from</span> pwn <span class="k">import</span> *</div>
+              <div class="code-line">exe = ELF(<span class="y">'./vuln_kernel'</span>)</div>
+              <div class="code-line">io = process(exe.path)</div>
+              <div class="code-line">payload = flat(</div>
+              <div class="code-line">    b<span class="y">'A'</span> * 40,               <span class="p"># Fill stack buf[40]</span></div>
+              <div class="code-line">    p64(0x4242424242424242), <span class="p"># Overwrite Saved RBP</span></div>
+              <div class="code-line">    p64(exe.sym.win_shell)   <span class="p"># Redirect RIP -&gt; 0x4011d6</span></div>
+              <div class="code-line">)</div>
+              <div class="code-line">io.sendline(payload)</div>
+              <div class="code-line">io.interactive()</div>
+            </div>
           </div>
         </div>
       </div>
     </section>
 
-    <div id="year-stats" class="request-stats">
-      <span class="label">Incoming Requests</span>
-      <span class="value"><span class="m">$</span> <span id="req-count">0</span></span>
-    </div>
-
-    <!-- Music Player -->
-    <div class="music-player">
-      <div class="music-header">
-        <span>Sound System</span>
-        <span id="player-status">Offline</span>
-      </div>
-      <div class="music-info">
-        <div class="music-controls">
-          <button id="play-pause" class="music-btn">▶</button>
+    <!-- ==========================================
+         SECTOR 01: OPERATIONS HUB WITH VISUAL PREVIEWS
+         ========================================== -->
+    <section id="projects" class="sec-block reveal">
+      <div class="sec-head">
+        <div>
+          <span class="sec-idx">// SECTOR_01</span>
+          <h2 data-scramble="OPERATIONS & KNOWLEDGE HUB">Operations &amp; Knowledge Hub</h2>
         </div>
-        <div id="current-song" class="song-title">Select a track</div>
+        <span class="sec-meta">SELECT_DIRECTORY [04 MODULES]</span>
       </div>
-      <select id="playlist" class="playlist-menu">
-        <option value="" disabled selected>-- Chọn playlist --</option>
-      </select>
+
+      <div class="ops-grid">
+        <a class="op-module cyber-panel tilt-card" href="writeups.html" data-index="01">
+          <div>
+            <div class="op-top">
+              <span>DIR // ~/WRITEUPS</span>
+              <span>[STATUS: ACTIVE]</span>
+            </div>
+            <h3>CTF Writeups &amp; Exploit Notes</h3>
+            <p>Tổng hợp writeup, phân tích lỗ hổng Pwn/Kernel, kịch bản khai thác và ghi chú kỹ thuật. Đỡ phải nhớ mọi thứ trong đầu (đầu người dễ crash).</p>
+          </div>
+          <div class="op-preview">
+            <div>$ checksec ./simple_overflow &amp;&amp; python3 solve.py</div>
+            <div><b>[+] RIP overwritten -&gt; 0x4011d6 &lt;secret_flag&gt;</b></div>
+          </div>
+          <div class="op-footer">
+            <div class="tags">
+              <span class="tag">PWN</span><span class="tag">BUFFER_OVERFLOW</span><span class="tag">MARKDOWN</span>
+            </div>
+            <span class="op-go">OPEN_ARCHIVE →</span>
+          </div>
+        </a>
+
+        <a class="op-module cyber-panel tilt-card" href="api.html" data-index="02">
+          <div>
+            <div class="op-top">
+              <span>DIR // ~/PUBLIC_APIS</span>
+              <span>[REST // JSON]</span>
+            </div>
+            <h3>Public Pentest APIs</h3>
+            <p>Danh sách các REST API và công cụ dòng lệnh trực tuyến hỗ trợ pentest, tra cứu IP/ASN và tự động hóa tác vụ bảo mật.</p>
+          </div>
+          <div class="op-preview">
+            <div>GET /api/v1/ip HTTP/1.1 — Host: 0xshijn.github.io</div>
+            <div><b>HTTP/1.1 200 OK // {"status":"online","isp":"VNPT"}</b></div>
+          </div>
+          <div class="op-footer">
+            <div class="tags">
+              <span class="tag">REST_API</span><span class="tag">IP_LOOKUP</span><span class="tag">SECURITY</span>
+            </div>
+            <span class="op-go">LAUNCH_API →</span>
+          </div>
+        </a>
+
+        <a class="op-module cyber-panel tilt-card" href="blog.html" data-index="03">
+          <div>
+            <div class="op-top">
+              <span>DIR // ~/DAILY_LOGS</span>
+              <span>[JOURNAL]</span>
+            </div>
+            <h3>Daily Research Log</h3>
+            <p>Nhật ký học tập, ghi chép quá trình rèn kỹ năng exploit mỗi ngày và những suy nghĩ thực tế trên hành trình nghiên cứu.</p>
+          </div>
+          <div class="op-preview">
+            <div>commit 8f92a1c (HEAD -&gt; main) — Author: 0xShiinn</div>
+            <div><b>[LOG] Ngày 1: Bắt đầu hành trình chinh phục Pwn</b></div>
+          </div>
+          <div class="op-footer">
+            <div class="tags">
+              <span class="tag">DIARY</span><span class="tag">LEARNING</span><span class="tag">DAILY</span>
+            </div>
+            <span class="op-go">READ_LOGS →</span>
+          </div>
+        </a>
+
+        <a class="op-module cyber-panel tilt-card" href="projects.html" data-index="04">
+          <div>
+            <div class="op-top">
+              <span>DIR // ~/MINI_APPS</span>
+              <span>[SANDBOX]</span>
+            </div>
+            <h3>Mini Web Apps &amp; Tooling</h3>
+            <p>Những ứng dụng nhỏ, công cụ hỗ trợ và mini-project mình tự code hoặc sưu tầm trong quá trình thực hành.</p>
+          </div>
+          <div class="op-preview">
+            <div>$ ./run_sandbox --module ip-lookup-terminal</div>
+            <div><b>[+] Interactive Web CLI initialized on port 443</b></div>
+          </div>
+          <div class="op-footer">
+            <div class="tags">
+              <span class="tag">TOOLS</span><span class="tag">WEB_APP</span><span class="tag">SHIP</span>
+            </div>
+            <span class="op-go">OPEN_TOOLS →</span>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         SECTOR 02: TACTICAL RADAR + ARSENAL MATRIX
+         ========================================== -->
+    <section id="skills" class="sec-block reveal">
+      <div class="sec-head">
+        <div>
+          <span class="sec-idx">// SECTOR_02</span>
+          <h2 data-scramble="ARSENAL & CAPABILITY MATRIX">Arsenal &amp; Capability Matrix</h2>
+        </div>
+        <span class="sec-meta">TELEMETRY_RADAR // MEMORY_MAP</span>
+      </div>
+
+      <div class="arsenal-layout">
+        <!-- 6-Axis SVG Tactical Capability Radar -->
+        <div class="radar-panel cyber-panel">
+          <div class="radar-head">
+            <span>// SKILL_RADAR_v2.6</span>
+            <span>[6-AXIS]</span>
+          </div>
+
+          <svg class="radar-svg" viewBox="0 0 260 240">
+            <polygon points="130,25 216,75 216,165 130,215 44,165 44,75" fill="none" stroke="rgba(0,255,163,0.18)" stroke-width="1"/>
+            <polygon points="130,55 190,90 190,150 130,185 70,150 70,90" fill="none" stroke="rgba(0,255,163,0.14)" stroke-width="1" stroke-dasharray="3 3"/>
+            <polygon points="130,85 164,105 164,135 130,155 96,135 96,105" fill="none" stroke="rgba(0,255,163,0.1)" stroke-width="1"/>
+            <line x1="130" y1="25" x2="130" y2="215" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+            <line x1="44" y1="75" x2="216" y2="165" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+            <line x1="216" y1="75" x2="44" y2="165" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+            <polygon class="radar-poly" points="130,36 198,82 204,158 130,206 58,156 54,81" />
+            <circle cx="130" cy="36" r="4" fill="#00ffa3"/>
+            <circle cx="198" cy="82" r="4" fill="#00e5ff"/>
+            <circle cx="204" cy="158" r="4" fill="#00ffa3"/>
+            <circle cx="130" cy="206" r="4" fill="#00ffa3"/>
+            <circle cx="58" cy="156" r="4" fill="#00e5ff"/>
+            <circle cx="54" cy="81" r="4" fill="#00ffa3"/>
+            <text x="130" y="14" text-anchor="middle" fill="#00ffa3" font-family="JetBrains Mono" font-size="10" font-weight="700">BINARY_PWN</text>
+            <text x="224" y="76" text-anchor="start" fill="#00e5ff" font-family="JetBrains Mono" font-size="9.5">KERNEL</text>
+            <text x="224" y="170" text-anchor="start" fill="#f2f7ff" font-family="JetBrains Mono" font-size="9.5">C / ASM</text>
+            <text x="130" y="232" text-anchor="middle" fill="#00ffa3" font-family="JetBrains Mono" font-size="10" font-weight="700">LINUX_OPS</text>
+            <text x="36" y="170" text-anchor="end" fill="#f2f7ff" font-family="JetBrains Mono" font-size="9.5">WEB_SEC</text>
+            <text x="36" y="76" text-anchor="end" fill="#00e5ff" font-family="JetBrains Mono" font-size="9.5">PWNTOOLS</text>
+          </svg>
+
+          <div style="font-family:var(--mono); font-size:11px; color:var(--muted); text-align:center">
+            PRIMARY FOCUS: <span style="color:var(--acid)">RING-0 / RING-3 PWN</span>
+          </div>
+        </div>
+
+        <!-- 3-Column Segmented Arsenal Matrix -->
+        <div class="arsenal-grid">
+          <div class="arsenal-col cyber-panel">
+            <div class="arsenal-col-head">
+              <span>01 // EXPLOITATION</span>
+              <span>[RING-0/3]</span>
+            </div>
+            <div class="skill-row">
+              <div class="skill-meta"><span>CTF Pwn &amp; Stack/Heap</span><span class="lvl">88%</span></div>
+              <div class="seg-bar"><div class="seg-fill" style="width:88%"></div></div>
+            </div>
+            <div class="skill-row">
+              <div class="skill-meta"><span>ROP &amp; Ret2dlresolve</span><span class="lvl">84%</span></div>
+              <div class="seg-bar"><div class="seg-fill" style="width:84%"></div></div>
+            </div>
+            <div class="skill-row">
+              <div class="skill-meta"><span>Kernel &amp; KASLR Bypass</span><span class="lvl">68%</span></div>
+              <div class="seg-bar"><div class="seg-fill" style="width:68%"></div></div>
+            </div>
+            <div class="skill-row">
+              <div class="skill-meta"><span>Web Security Mindset</span><span class="lvl">78%</span></div>
+              <div class="seg-bar"><div class="seg-fill" style="width:78%"></div></div>
+            </div>
+          </div>
+
+          <div class="arsenal-col cyber-panel">
+            <div class="arsenal-col-head">
+              <span>02 // LANGUAGES</span>
+              <span>[CORE]</span>
+            </div>
+            <div class="skill-row">
+              <div class="skill-meta"><span>Python (pwntools)</span><span class="lvl">92%</span></div>
+              <div class="seg-bar"><div class="seg-fill" style="width:92%"></div></div>
+            </div>
+            <div class="skill-row">
+              <div class="skill-meta"><span>C / C++ &amp; x86_64 ASM</span><span class="lvl">84%</span></div>
+              <div class="seg-bar"><div class="seg-fill" style="width:84%"></div></div>
+            </div>
+            <div class="skill-row">
+              <div class="skill-meta"><span>HTML / CSS / JS</span><span class="lvl">85%</span></div>
+              <div class="seg-bar"><div class="seg-fill" style="width:85%"></div></div>
+            </div>
+            <div class="skill-row">
+              <div class="skill-meta"><span>Node.js &amp; React</span><span class="lvl">74%</span></div>
+              <div class="seg-bar"><div class="seg-fill" style="width:74%"></div></div>
+            </div>
+          </div>
+
+          <div class="arsenal-col cyber-panel">
+            <div class="arsenal-col-head">
+              <span>03 // INFRA &amp; RE</span>
+              <span>[OPS]</span>
+            </div>
+            <div class="skill-row">
+              <div class="skill-meta"><span>Linux Daily + Git</span><span class="lvl">94%</span></div>
+              <div class="seg-bar"><div class="seg-fill" style="width:94%"></div></div>
+            </div>
+            <div class="skill-row">
+              <div class="skill-meta"><span>GDB / Pwndbg / IDA</span><span class="lvl">88%</span></div>
+              <div class="seg-bar"><div class="seg-fill" style="width:88%"></div></div>
+            </div>
+            <div class="skill-row">
+              <div class="skill-meta"><span>Docker &amp; Containers</span><span class="lvl">82%</span></div>
+              <div class="seg-bar"><div class="seg-fill" style="width:82%"></div></div>
+            </div>
+            <div class="skill-row">
+              <div class="skill-meta"><span>Bash &amp; Automation</span><span class="lvl">86%</span></div>
+              <div class="seg-bar"><div class="seg-fill" style="width:86%"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CTF & Research Activity Heatmap Strip -->
+      <div class="heatmap-strip cyber-panel">
+        <div class="heatmap-title">
+          // RESEARCH_ACTIVITY_TELEMETRY : <b>ACTIVE EXPLOIT LAB STREAK [2026]</b>
+        </div>
+        <div id="heatmap-cells" class="heatmap-cells" aria-label="Activity Heatmap"></div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         SECTOR 03: OPERATOR DOSSIER & DIRECTIVES
+         ========================================== -->
+    <section id="about" class="sec-block reveal">
+      <div class="sec-head">
+        <div>
+          <span class="sec-idx">// SECTOR_03</span>
+          <h2 data-scramble="OPERATOR DOSSIER & DIRECTIVES">Operator Dossier &amp; Directives</h2>
+        </div>
+        <span class="sec-meta">PROFILE // MISSIONS // UPLINK</span>
+      </div>
+
+      <div class="dossier-grid">
+        <div id="contact" class="dossier-panel cyber-panel">
+          <div style="font-family:var(--mono); font-size:11px; color:var(--acid); margin-bottom:12px">// OPERATOR_PROFILE &amp; UPLINK</div>
+          <p class="dossier-quote">
+            Mình thích kiểu làm việc truyền thống: <b>Tính cách mình có phần hơi nóng và ẩu</b>.
+            Portfolio này là nơi mình gom lại những thứ đã làm ra được, tự rèn tính kỷ luật và chuẩn chỉnh trong từng dòng exploit.
+          </p>
+
+          <div class="trait-tags">
+            <span class="trait">[TÍNH CÁCH: THỰC TẾ]</span>
+            <span class="trait">[ƯU TIÊN: CHẤT LƯỢNG]</span>
+            <span class="trait">[NGUYÊN TẮC: NÓI ÍT LÀM NHIỀU]</span>
+          </div>
+
+          <div style="font-family:var(--mono); font-size:12px; color:var(--muted); margin-bottom:14px">
+            &gt; Cậu có thể tìm tớ qua các liên kết mạng xã hội phía bên dưới nha &lt;3
+          </div>
+
+          <div class="hero-actions">
+            <button id="copy-email" type="button" class="tac-btn primary" style="padding:10px 18px; font-size:12px">
+              COPY EMAIL // 0xshiinnn@gmail.com
+            </button>
+            <a class="tac-btn" style="padding:10px 16px; font-size:12px" href="https://facebook.com/phwctoazn" target="_blank" rel="noreferrer">
+              FACEBOOK
+            </a>
+            <a class="tac-btn" style="padding:10px 16px; font-size:12px" href="https://instagram.com/_phwctoazn" target="_blank" rel="noreferrer">
+              INSTAGRAM
+            </a>
+          </div>
+        </div>
+
+        <div class="dossier-panel cyber-panel">
+          <div style="font-family:var(--mono); font-size:11px; color:var(--cyan); margin-bottom:16px">// ACTIVE_DIRECTIVES [2026]</div>
+
+          <div class="directive-box">
+            <div class="dir-top">
+              <span>DIRECTIVE_01 // LEARNING_PATH</span>
+              <span>PROGRESS: 68%</span>
+            </div>
+            <div class="dir-title">Advanced Linux Kernel Exploitation</div>
+            <div class="dir-desc">Nghiên cứu sâu về cơ chế cấp phát bộ nhớ slub/heap grooming, modprobe_path và kỹ thuật bypass KASLR/SMEP/SMAP.</div>
+            <div class="seg-bar" style="margin-top:12px"><div class="seg-fill" style="width:68%"></div></div>
+          </div>
+
+          <div class="directive-box">
+            <div class="dir-top">
+              <span>DIRECTIVE_02 // CERTIFICATION_TARGET</span>
+              <span>TARGET: 2026</span>
+            </div>
+            <div class="dir-title">OSCP Certification (OffSec)</div>
+            <div class="dir-desc">Mục tiêu chinh phục chứng chỉ Offensive Security Certified Professional trong năm 2026.</div>
+            <div class="seg-bar" style="margin-top:12px"><div class="seg-fill" style="width:45%"></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div>© <span id="year"></span> 0xSHIINN // BUILT WITH RAW HTML/CSS/JS — ZERO FRAMEWORK BLOAT</div>
+      <div style="color:var(--acid)">LE PHUOC TOAN w Gh0st4c3.exe</div>
+    </footer>
+  </main>
+
+  <!-- Bottom Tactical Status Bar (tmux style) -->
+  <div class="tmux-dock">
+    <div class="tmux-left">
+      <span class="tmux-mode">RING-0 // 0xSHIINN</span>
+      <div class="music-inline">
+        <button id="play-pause" class="music-btn" title="Play / Pause">▶</button>
+        <span id="current-song" style="max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">Select a track</span>
+        <select id="playlist" class="playlist-menu">
+          <option value="" disabled selected>-- Playlist --</option>
+        </select>
+        <span id="player-status" style="color:var(--muted); font-size:10px">[Offline]</span>
+      </div>
       <div id="yt-player" style="display:none"></div>
       <iframe id="sc-player" style="position:absolute; top:-1000px; left:-1000px; width:1px; height:1px;" src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/293&show_artwork=false"></iframe>
     </div>
 
-    <footer>
-      <div>© <span id="year"></span> Shiinn. Built with HTML/CSS/JS. No framework drama.</div>
-      <div style="font-family:var(--mono)">Le Phuoc Toan w Gh0st4c3.exe</div>
-    </footer>
-  </main>
+    <div class="tmux-right">
+      <span>INCOMING_REQS: <b style="color:var(--acid)">$<span id="req-count">1,024</span></b></span>
+      <span style="color:var(--muted)">|</span>
+      <span style="color:var(--cyan)">SESSION: ACTIVE</span>
+    </div>
+  </div>
+
+  <!-- Command Palette Modal -->
+  <div id="cmd-overlay" class="cmd-overlay" aria-hidden="true">
+    <div class="cmd-modal" role="dialog" aria-label="Quick Navigation">
+      <div class="cmd-search-wrap">
+        <span>&gt;_</span>
+        <input id="cmd-search" class="cmd-search" type="text" placeholder="Type target module or action..." autocomplete="off" />
+      </div>
+      <div id="cmd-list" class="cmd-list">
+        <div class="cmd-item" data-action="writeups.html"><span>[01] Mở CTF Writeups Archive</span><span class="cmd-hint">/writeups.html</span></div>
+        <div class="cmd-item" data-action="api.html"><span>[02] Mở Public Pentest APIs</span><span class="cmd-hint">/api.html</span></div>
+        <div class="cmd-item" data-action="api/pages/ip-lookup.html"><span>[03] Chạy IP Lookup Terminal</span><span class="cmd-hint">/tools/ip-lookup</span></div>
+        <div class="cmd-item" data-action="blog.html"><span>[04] Mở Daily Research Blog</span><span class="cmd-hint">/blog.html</span></div>
+        <div class="cmd-item" data-action="projects.html"><span>[05] Mở Mini Web Apps</span><span class="cmd-hint">/projects.html</span></div>
+        <div class="cmd-item" data-action="exploit"><span>[06] ⚡ Chạy mô phỏng Buffer Overflow</span><span class="cmd-hint">Live Exploit</span></div>
+        <div class="cmd-item" data-action="theme"><span>[07] Đổi chế độ Dark / Light HUD</span><span class="cmd-hint">Toggle Theme</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast">[+] COPIED TO CLIPBOARD</div>
 
   <script src="js/playlist.js"></script>
   <script>
-    // typing effect (đủ sang, không lố)
+    // 0. Synthesized Web Audio Sci-Fi Tactical UI Sound Effects
+    let sfxEnabled = true;
+    let audioCtx = null;
+    function playBeep(freq = 880, duration = 0.035, type = "sine", vol = 0.03) {
+      if (!sfxEnabled) return;
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === "suspended") audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    document.getElementById("sfx-toggle").addEventListener("click", () => {
+      sfxEnabled = !sfxEnabled;
+      document.getElementById("sfx-label").textContent = sfxEnabled ? "🔊 SFX" : "🔇 MUTE";
+      if (sfxEnabled) playBeep(1200, 0.06, "triangle", 0.05);
+    });
+
+    // 1. Live HUD Clock
+    function updateClock() {
+      const now = new Date();
+      const el = document.getElementById("hud-clock");
+      if (el) el.textContent = now.toTimeString().split(" ")[0] + " UTC+7";
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // 2. Custom Tactical Target-Lock Reticle Cursor & Panel Spotlight
+    const reticle = document.getElementById("cursor-reticle");
+    const coords = document.getElementById("cursor-coords");
+    let mouseX = window.innerWidth / 2, mouseY = window.innerHeight / 2;
+
+    window.addEventListener("mousemove", (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+      reticle.style.left = mouseX + "px";
+      reticle.style.top = mouseY + "px";
+      coords.style.left = mouseX + "px";
+      coords.style.top = mouseY + "px";
+      coords.textContent = `0x${mouseX.toString(16).toUpperCase().padStart(3,'0')} : 0x${mouseY.toString(16).toUpperCase().padStart(3,'0')}`;
+    });
+
+    document.querySelectorAll(".cyber-panel").forEach(panel => {
+      panel.addEventListener("mousemove", (e) => {
+        const r = panel.getBoundingClientRect();
+        panel.style.setProperty("--mx", `${e.clientX - r.left}px`);
+        panel.style.setProperty("--my", `${e.clientY - r.top}px`);
+      });
+    });
+
+    document.querySelectorAll("a, button, input, select, .op-module").forEach(el => {
+      el.addEventListener("mouseenter", () => {
+        reticle.classList.add("locked");
+        playBeep(1400, 0.02, "sine", 0.015);
+      });
+      el.addEventListener("mouseleave", () => reticle.classList.remove("locked"));
+    });
+
+    // 3. 3D Rotating Cyber-Core Sphere Canvas
+    const canvas = document.getElementById("bg-canvas");
+    const ctx = canvas.getContext("2d");
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
+
+    const spherePts = [];
+    const numSphere = 96;
+    for (let i = 0; i < numSphere; i++) {
+      const phi = Math.acos(1 - 2 * (i + 0.5) / numSphere);
+      const theta = Math.PI * (1 + Math.sqrt(5)) * i;
+      spherePts.push({
+        x: Math.cos(theta) * Math.sin(phi),
+        y: Math.sin(theta) * Math.sin(phi),
+        z: Math.cos(phi)
+      });
+    }
+
+    let angleY = 0, angleX = 0;
+    function render3DCanvas() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      angleY += 0.0032 + (mouseX / canvas.width - 0.5) * 0.0035;
+      angleX += 0.0014 + (mouseY / canvas.height - 0.5) * 0.0025;
+
+      const cx = canvas.width * 0.76;
+      const cy = canvas.height * 0.38;
+      const radius = Math.min(canvas.width, canvas.height) * 0.29;
+
+      const projected = spherePts.map(p => {
+        let x1 = p.x * Math.cos(angleY) - p.z * Math.sin(angleY);
+        let z1 = p.z * Math.cos(angleY) + p.x * Math.sin(angleY);
+        let y2 = p.y * Math.cos(angleX) - z1 * Math.sin(angleX);
+        let z2 = z1 * Math.cos(angleX) + p.y * Math.sin(angleX);
+        const scale = 320 / (320 + z2 * 120);
+        return { sx: cx + x1 * radius * scale, sy: cy + y2 * radius * scale, z: z2 };
+      });
+
+      for (let i = 0; i < projected.length; i++) {
+        const a = projected[i];
+        ctx.fillStyle = a.z > 0 ? "rgba(0, 255, 163, 0.55)" : "rgba(0, 229, 255, 0.16)";
+        ctx.fillRect(a.sx - 1.5, a.sy - 1.5, 3, 3);
+        for (let j = i + 1; j < projected.length; j++) {
+          const b = projected[j];
+          const dist = Math.hypot(a.sx - b.sx, a.sy - b.sy);
+          if (dist < radius * 0.42) {
+            const alpha = (1 - dist / (radius * 0.42)) * (a.z > 0 ? 0.17 : 0.04);
+            ctx.strokeStyle = `rgba(0, 255, 163, ${alpha})`;
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(a.sx, a.sy);
+            ctx.lineTo(b.sx, b.sy);
+            ctx.stroke();
+          }
+        }
+      }
+      requestAnimationFrame(render3DCanvas);
+    }
+    render3DCanvas();
+
+    // 4. Cipher Scramble Text Effect
+    const chars = "0123456789ABCDEF#%&*$@";
+    function scrambleText(el) {
+      const original = el.getAttribute("data-scramble") || el.textContent;
+      let iter = 0;
+      clearInterval(el._scrambleTimer);
+      el._scrambleTimer = setInterval(() => {
+        el.textContent = original
+          .split("")
+          .map((ch, idx) => {
+            if (ch === " ") return " ";
+            if (idx < iter) return original[idx];
+            return chars[Math.floor(Math.random() * chars.length)];
+          })
+          .join("");
+        if (iter >= original.length) clearInterval(el._scrambleTimer);
+        iter += 1 / 2;
+      }, 24);
+    }
+    document.querySelectorAll("[data-scramble]").forEach(el => {
+      el.addEventListener("mouseenter", () => scrambleText(el));
+      setTimeout(() => scrambleText(el), 250);
+    });
+
+    // 5. 3D Perspective Tilt
+    document.querySelectorAll(".tilt-card, #pwn-console").forEach(card => {
+      card.addEventListener("mousemove", (e) => {
+        const rect = card.getBoundingClientRect();
+        const x = (e.clientX - rect.left) / rect.width - 0.5;
+        const y = (e.clientY - rect.top) / rect.height - 0.5;
+        card.style.transform = `perspective(950px) rotateY(${x * 5}deg) rotateX(${-y * 5}deg) translateY(-3px)`;
+      });
+      card.addEventListener("mouseleave", () => { card.style.transform = ""; });
+    });
+
+    // 6. Pwndbg Studio Tabs
+    document.querySelectorAll(".pwn-tab").forEach(tab => {
+      tab.addEventListener("click", () => {
+        playBeep(960, 0.04, "triangle", 0.03);
+        document.querySelectorAll(".pwn-tab").forEach(t => t.classList.remove("active"));
+        document.querySelectorAll(".pwn-pane").forEach(p => p.classList.remove("active"));
+        tab.classList.add("active");
+        document.getElementById(tab.getAttribute("data-pane")).classList.add("active");
+      });
+    });
+
+    // 7. Activity Heatmap Cells
+    const hmContainer = document.getElementById("heatmap-cells");
+    if (hmContainer) {
+      const levels = ["", "l1", "l2", "l3", "l2", "l1", "l3", "l3", "l2", "", "l1", "l3", "l2", "l3"];
+      for (let c = 0; c < 56; c++) {
+        const div = document.createElement("div");
+        div.className = "hm-cell " + levels[(c * 7 + 3) % levels.length];
+        hmContainer.appendChild(div);
+      }
+    }
+
+    // 8. Live Buffer Overflow Exploit Animation Simulator
+    const termOutput = document.getElementById("term-output");
+    const termInput = document.getElementById("term-input");
+    const regRip = document.getElementById("reg-rip");
+    const regRbp = document.getElementById("reg-rbp");
+    const regRax = document.getElementById("reg-rax");
+    const slotBuf = document.getElementById("slot-buf");
+    const slotRbp = document.getElementById("slot-rbp");
+    const slotRet = document.getElementById("slot-ret");
+    const valBuf = document.getElementById("val-buf");
+    const valRbp = document.getElementById("val-rbp");
+    const valRet = document.getElementById("val-ret");
+    const stackStatus = document.getElementById("stack-status");
+    let exploitRunning = false;
+
+    function appendTermLine(html) {
+      const div = document.createElement("div");
+      div.className = "code-line";
+      div.innerHTML = html;
+      termOutput.appendChild(div);
+      termOutput.scrollTop = termOutput.scrollHeight;
+    }
+
+    async function runExploitSimulation() {
+      if (exploitRunning) return;
+      exploitRunning = true;
+
+      // Switch to shell tab
+      document.querySelectorAll(".pwn-tab").forEach(t => t.classList.remove("active"));
+      document.querySelectorAll(".pwn-pane").forEach(p => p.classList.remove("active"));
+      document.querySelector('[data-pane="pane-shell"]').classList.add("active");
+      document.getElementById("pane-shell").classList.add("active");
+
+      slotBuf.className = "stack-slot";
+      slotRbp.className = "stack-slot";
+      slotRet.className = "stack-slot";
+      valBuf.textContent = '"shiinn_input\\0"';
+      valRbp.textContent = "0x7fffffffe3f0";
+      valRet.textContent = "0x401142 <main>";
+      regRip.textContent = "0x401142 <vuln+28>";
+      stackStatus.textContent = "STATE: INJECTING PAYLOAD...";
+      stackStatus.style.color = "var(--amber)";
+
+      playBeep(520, 0.08, "sawtooth", 0.04);
+      appendTermLine(`<span class="p">pwndbg&gt;</span> <span class="m">python3 exploit.py --target ./vuln_kernel</span>`);
+      await new Promise(r => setTimeout(r, 420));
+
+      slotBuf.classList.add("corrupted");
+      valBuf.textContent = "0x4141414141414141 (x5)";
+      playBeep(680, 0.07, "square", 0.035);
+      appendTermLine(`[*] Overflowing char buf[40] with <span class="y">b'A' * 40</span>...`);
+      await new Promise(r => setTimeout(r, 520));
+
+      slotRbp.classList.add("corrupted");
+      valRbp.textContent = "0x4242424242424242";
+      regRbp.textContent = "0x4242424242424242";
+      regRbp.classList.add("reg-flash");
+      playBeep(820, 0.07, "square", 0.035);
+      appendTermLine(`[*] Corrupting Saved RBP -&gt; <span class="y">0x4242424242424242</span>...`);
+      await new Promise(r => setTimeout(r, 520));
+      regRbp.classList.remove("reg-flash");
+
+      slotRet.classList.add("pwned");
+      valRet.textContent = "0x4011d6 <win_shell>";
+      regRip.textContent = "0x4011d6 <win_shell>";
+      regRip.classList.add("reg-flash");
+      regRax.textContent = "0x0000000000000000 (ROOT)";
+      stackStatus.textContent = "STATE: RIP HIJACKED → ROOT SHELL!";
+      stackStatus.style.color = "var(--acid)";
+
+      playBeep(1100, 0.12, "triangle", 0.05);
+      setTimeout(() => playBeep(1480, 0.18, "triangle", 0.05), 110);
+
+      appendTermLine(`[+] Control flow hijacked! <span class="r">RIP = 0x4011d6 &lt;win_shell&gt;</span>`);
+      await new Promise(r => setTimeout(r, 380));
+      regRip.classList.remove("reg-flash");
+      appendTermLine(`[+] <span class="g">uid=0(root) gid=0(root) — FLAG{0xSH11NN_R1NG0_PWNED_2026}</span>`);
+
+      exploitRunning = false;
+    }
+
+    document.getElementById("run-exploit-btn").addEventListener("click", runExploitSimulation);
+    document.getElementById("hero-pwn-btn").addEventListener("click", runExploitSimulation);
+
+    // Interactive CLI Commands
+    function runTerminalCmd(raw) {
+      const cmd = raw.trim().toLowerCase();
+      if (!cmd) return;
+      playBeep(900, 0.03, "sine", 0.025);
+
+      if (cmd === "exploit" || cmd === "pwn") {
+        runExploitSimulation();
+        return;
+      }
+
+      appendTermLine(`<span class="p">pwndbg&gt;</span> <span class="m">${raw.replace(/</g, "&lt;")}</span>`);
+
+      if (cmd === "help") {
+        appendTermLine(`Commands: <span class="k">exploit</span>, <span class="k">checksec</span>, <span class="k">vmmap</span>, <span class="k">ls</span>, <span class="k">whoami</span>, <span class="k">cat flag.txt</span>, <span class="k">writeups</span>, <span class="k">clear</span>`);
+      } else if (cmd === "vmmap") {
+        appendTermLine(`<span class="k">0x400000 0x401000 r--p</span> /home/shiinn/vuln_kernel<br><span class="g">0x401000 0x402000 r-xp</span> /home/shiinn/vuln_kernel (CODE)<br><span class="y">0x7ffffffde000 0x7ffffffff000 rw-p</span> [stack]`);
+      } else if (cmd === "checksec") {
+        appendTermLine(`RELRO: <span class="g">Full RELRO</span> | Canary: <span class="r">No canary</span> | NX: <span class="g">Enabled</span> | PIE: <span class="y">No PIE (0x400000)</span>`);
+      } else if (cmd === "ls") {
+        appendTermLine(`<span class="k">writeups/</span>  <span class="k">api/</span>  <span class="k">blog/</span>  <span class="k">projects/</span>  <span class="g">exploit.py</span>  <span class="y">flag.txt</span>`);
+      } else if (cmd === "whoami") {
+        appendTermLine(`uid=0(<span class="g">root/shiinn</span>) gid=0(research) groups=0(pwn)`);
+      } else if (cmd === "flag" || cmd === "cat flag.txt") {
+        appendTermLine(`<span class="g">FLAG{0xSH11NN_R1NG0_EXPLOIT_LAB_2026}</span>`);
+      } else if (cmd === "writeups") {
+        appendTermLine(`Redirecting to <span class="k">writeups.html</span>...`);
+        setTimeout(() => { window.location.href = "writeups.html"; }, 400);
+      } else if (cmd === "clear") {
+        termOutput.innerHTML = "";
+      } else {
+        appendTermLine(`Unknown command: "${cmd.replace(/</g, "&lt;")}". Type <span class="k">help</span> or <span class="k">exploit</span>.`);
+      }
+    }
+
+    termInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        runTerminalCmd(termInput.value);
+        termInput.value = "";
+      }
+    });
+    document.querySelectorAll(".cmd-chip").forEach(btn => {
+      btn.addEventListener("click", () => runTerminalCmd(btn.getAttribute("data-cmd")));
+    });
+
+    // Typing effect
     const items = [
-      "Learning pwn.",
-      "Breaking assumptions.",
-      "Understanding systems.",
-      "CTF Player.",
-      "Security Minded."
+      "Learning pwn. Breaking assumptions.",
+      "Bypassing KASLR & SMEP/SMAP.",
+      "Understanding systems from Ring-0.",
+      "CTF Player & Exploit Developer."
     ];
     const el = document.getElementById("typing");
     let i = 0, j = 0, del = false;
-
-    function tick(){
+    function tick() {
       const cur = items[i];
-      if(!del){
+      if (!del) {
         j++;
         el.textContent = cur.slice(0, j);
-        if(j === cur.length){ del = true; setTimeout(tick, 1200); return; }
+        if (j === cur.length) { del = true; setTimeout(tick, 1400); return; }
       } else {
         j--;
         el.textContent = cur.slice(0, j);
-        if(j === 0){ del = false; i = (i+1) % items.length; }
+        if (j === 0) { del = false; i = (i + 1) % items.length; }
       }
-      setTimeout(tick, del ? 30 : 45);
+      setTimeout(tick, del ? 25 : 40);
     }
     tick();
 
-    // reveal on scroll
-    const obs = new IntersectionObserver((entries)=>{
-      entries.forEach(e=>{
-        if(e.isIntersecting) e.target.classList.add("show");
+    // Reveal on scroll
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) e.target.classList.add("show");
       });
-    }, {threshold: .12});
-    document.querySelectorAll(".reveal").forEach(x=>obs.observe(x));
+    }, { threshold: 0.08 });
+    document.querySelectorAll(".reveal").forEach(x => obs.observe(x));
 
     document.getElementById("year").textContent = new Date().getFullYear();
+
+    // Toast & Copy Email
+    const toastEl = document.getElementById("toast");
+    function showToast(msg) {
+      toastEl.textContent = msg;
+      toastEl.classList.add("show");
+      setTimeout(() => toastEl.classList.remove("show"), 2200);
+    }
+    document.getElementById("copy-email").addEventListener("click", () => {
+      navigator.clipboard.writeText("0xshiinnn@gmail.com");
+      playBeep(1300, 0.07, "triangle", 0.04);
+      showToast("[+] COPIED: 0xshiinnn@gmail.com");
+    });
 
     // Theme Toggle
     const themeToggle = document.getElementById("theme-toggle");
     const currentTheme = localStorage.getItem("theme");
-
-    if (currentTheme) {
-      document.documentElement.setAttribute("data-theme", currentTheme);
-    }
-
-    themeToggle.addEventListener("click", () => {
+    if (currentTheme) document.documentElement.setAttribute("data-theme", currentTheme);
+    function toggleTheme() {
       let theme = document.documentElement.getAttribute("data-theme");
       if (theme === "light") {
         document.documentElement.removeAttribute("data-theme");
@@ -791,9 +2154,46 @@ cậu có thể tìm tớ qua các liên kết mạng xã hội phía bên dư�
         document.documentElement.setAttribute("data-theme", "light");
         localStorage.setItem("theme", "light");
       }
+    }
+    themeToggle.addEventListener("click", toggleTheme);
+
+    // Command Palette
+    const cmdOverlay = document.getElementById("cmd-overlay");
+    const cmdSearch = document.getElementById("cmd-search");
+    const openCmdBtn = document.getElementById("open-cmd");
+    function openCmdModal() {
+      cmdOverlay.classList.add("open");
+      cmdSearch.value = "";
+      filterCmdItems("");
+      setTimeout(() => cmdSearch.focus(), 50);
+    }
+    function closeCmdModal() { cmdOverlay.classList.remove("open"); }
+    openCmdBtn.addEventListener("click", openCmdModal);
+    cmdOverlay.addEventListener("click", (e) => { if (e.target === cmdOverlay) closeCmdModal(); });
+    window.addEventListener("keydown", (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        cmdOverlay.classList.contains("open") ? closeCmdModal() : openCmdModal();
+      } else if (e.key === "Escape") closeCmdModal();
+    });
+    function filterCmdItems(q) {
+      const query = q.toLowerCase();
+      document.querySelectorAll(".cmd-item").forEach(item => {
+        item.style.display = item.textContent.toLowerCase().includes(query) ? "flex" : "none";
+      });
+    }
+    cmdSearch.addEventListener("input", (e) => filterCmdItems(e.target.value));
+    document.querySelectorAll(".cmd-item").forEach(item => {
+      item.addEventListener("click", () => {
+        const act = item.getAttribute("data-action");
+        closeCmdModal();
+        if (act === "theme") toggleTheme();
+        else if (act === "exploit") runExploitSimulation();
+        else if (act) window.location.href = act;
+      });
     });
 
-    // Request Counter Logic
+    // Request Counter
     let count = parseInt(localStorage.getItem('reqCount') || '1024');
     const updateCount = () => {
       count += Math.floor(Math.random() * 3) + 1;
@@ -806,13 +2206,9 @@ cậu có thể tìm tớ qua các liên kết mạng xã hội phía bên dư�
     // Music Player Logic
     let ytPlayer, scPlayer;
     let currentType = 'youtube';
-
-    // Load YouTube API
     const ytTag = document.createElement('script');
     ytTag.src = "https://www.youtube.com/iframe_api";
     document.head.appendChild(ytTag);
-
-    // Load SoundCloud API
     const scTag = document.createElement('script');
     scTag.src = "https://w.soundcloud.com/player/api.js";
     document.head.appendChild(scTag);
@@ -821,14 +2217,13 @@ cậu có thể tìm tớ qua các liên kết mạng xã hội phía bên dư�
       ytPlayer = new YT.Player('yt-player', {
         height: '0', width: '0', videoId: '',
         playerVars: { 'autoplay': 0, 'controls': 0 },
-        events: { 'onStateChange': (e) => { if(e.data === 0) playNext(); } }
+        events: { 'onStateChange': (e) => { if (e.data === 0) playNext(); } }
       });
     };
-
     scTag.onload = () => {
       scPlayer = SC.Widget('sc-player');
       scPlayer.bind(SC.Widget.Events.READY, () => {
-        playerStatus.textContent = 'Ready';
+        playerStatus.textContent = '[Ready]';
       });
     };
 
@@ -840,68 +2235,56 @@ cậu có thể tìm tớ qua các liên kết mạng xã hội phía bên dư�
     playlist.addEventListener('change', (e) => {
       const song = playlistData[e.target.value];
       if (!song) return;
-      
       currentType = song.type;
-      
-      // Reset status
-      playerStatus.textContent = 'Loading...';
+      playerStatus.textContent = '[Loading]';
       currentSongText.textContent = song.title;
-
-      // Stop both players
       if (ytPlayer && ytPlayer.pauseVideo) ytPlayer.pauseVideo();
       if (scPlayer && scPlayer.pause) scPlayer.pause();
 
       if (currentType === 'youtube') {
         ytPlayer.loadVideoById(song.id);
         playPauseBtn.textContent = '⏸';
-        playerStatus.textContent = 'Playing';
+        playerStatus.textContent = '[Playing]';
       } else if (scPlayer) {
-        // Sử dụng link trực tiếp từ id
         scPlayer.load(song.id, {
-          auto_play: true,
-          hide_related: true,
-          show_comments: false,
-          show_user: false,
-          show_reposts: false,
-          show_teaser: false,
-          visual: false
+          auto_play: true, hide_related: true, show_comments: false,
+          show_user: false, show_reposts: false, show_teaser: false, visual: false
         });
-        
         scPlayer.bind(SC.Widget.Events.READY, () => {
           scPlayer.play();
           playPauseBtn.textContent = '⏸';
-          playerStatus.textContent = 'Playing';
+          playerStatus.textContent = '[Playing]';
         });
       }
     });
 
     playPauseBtn.addEventListener('click', () => {
-      if (currentType === 'youtube') {
+      if (currentType === 'youtube' && ytPlayer && ytPlayer.getPlayerState) {
         if (ytPlayer.getPlayerState() === 1) {
           ytPlayer.pauseVideo();
           playPauseBtn.textContent = '▶';
-          playerStatus.textContent = 'Paused';
+          playerStatus.textContent = '[Paused]';
         } else {
           ytPlayer.playVideo();
           playPauseBtn.textContent = '⏸';
-          playerStatus.textContent = 'Playing';
+          playerStatus.textContent = '[Playing]';
         }
       } else if (scPlayer) {
         scPlayer.isPaused((paused) => {
           if (paused) {
             scPlayer.play();
             playPauseBtn.textContent = '⏸';
-            playerStatus.textContent = 'Playing';
+            playerStatus.textContent = '[Playing]';
           } else {
             scPlayer.pause();
             playPauseBtn.textContent = '▶';
-            playerStatus.textContent = 'Paused';
+            playerStatus.textContent = '[Paused]';
           }
         });
       }
     });
 
-    function playNext() { /* Có thể code thêm tính năng tự chuyển bài ở đây */ }
+    function playNext() {}
   </script>
 </body>
 </html>
